@@ -45,11 +45,13 @@ html, body {
 }
 
 #searchalert {
-    display: hidden;
+    display: none;
+    padding: 4px;
 }
 
 .alert {
     color: orangered;
+    font: 0.8em "Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
 .footnote {
