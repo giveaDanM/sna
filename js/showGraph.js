@@ -102,14 +102,14 @@ function init() {
 
     $('#searchbox').bind('keydown', function(event) {
         if (event.which == 13) {
-            if (st.length == 0) {
+            searchTerm = $(event.target).val().toLowerCase();
+            if (searchTerm.length == 0) {
                 return;
             }
             // Reset the graph view
             sigInst.position(0,0,1).draw();
 
             found = false;
-            searchTerm = $(event.target).val().toLowerCase();
             sigInst.iterNodes(function(n) {
                 if (!found) {
                     if (n.label.toLowerCase() == searchTerm) {
