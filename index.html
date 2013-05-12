@@ -41,11 +41,14 @@
                 The graph below is zoomable and draggable, so have an explore! If you click on a subreddit, it will open in a new tab.
             </p>
             <div id="graph-wrapper">
-                <div id="graph"></div>
                 <div id="controls">
                     <button id="reset-graph">Reset graph</button>
                     <button id="toggle-hiding">Hide unconnected networks</button>
+                    <div id="search">
+                        <input type="search" name="searchbox" results=5 placeholder="e.g. 'AskReddit'"/>
+                    </div>
                 </div>
+                <div id="graph"></div>
                 <div class="right footnote">Powered by <div class="sigma-font">sigma.js</div>. Best viewed in <a target="_blank" href="http://www.google.com/chrome">Google Chrome</a></div>
             </div>
             <br />

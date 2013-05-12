@@ -34,7 +34,7 @@ html, body {
     display: inline;
 }
 
-#controls {
+#controls div, button, input {
     float: left;
 }
 
