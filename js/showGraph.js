@@ -129,6 +129,34 @@ function init() {
         }
     });
 
+    $('#searchbox').bind('mouseup', function(event) {
+        var input = $(this),
+        oldValue = input.val().toLowerCase();
+
+        if (oldValue == "") {
+            return;
+        }
+
+        // When this event is fired after clicking on the clear button
+        // the value is not cleared yet. We have to wait for it.
+        setTimeout(function() {
+            var newValue = input.val();
+            if (newValue.length == 0){
+                // Gotcha
+                var found = false;
+                sigInst.iterNodes(function(n) {
+                    if (!found) {
+                        if (n.label.toLowerCase() == oldValue) {
+                            n.active = false;
+                            found = true;
+                            sigInst.draw();
+                        }
+                    }
+                });
+            }
+        }, 1);
+    });
+
     // Draw the graph :
     sigInst.activateFishEye().draw();
 
