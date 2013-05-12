@@ -22,6 +22,7 @@ html, body {
     width: 100%;
     height: 100%;
     background: #222;
+    float: left;
     border-radius: 7px;
       -moz-border-radius: 7px;
       -webkit-border-radius: 7px;
@@ -34,8 +35,22 @@ html, body {
     display: inline;
 }
 
-#controls div, button, input {
+#controls {
+    float: initial;
+}
+
+#controls>div,
+#controls>button,
+#controls>input {
     float: left;
+}
+
+#searchalert {
+    display: hidden;
+}
+
+.alert {
+    color: orangered;
 }
 
 .footnote {
