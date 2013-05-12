@@ -39,9 +39,8 @@ html, body {
     float: initial;
 }
 
-#controls>div,
-#controls>button,
-#controls>input {
+#controls>*,
+#controls>*>* {
     float: left;
 }
 
