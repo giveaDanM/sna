@@ -111,13 +111,12 @@ function init() {
             found = false;
             searchTerm = $(event.target).val().toLowerCase();
             sigInst.iterNodes(function(n) {
-                if (found) {
-                    break;
-                }
-                if (n.label.toLowerCase() == searchTerm) {
-                    n.active = true;
-                    sigInst.zoomTo(n.displayX, n.displayY, 5);
-                    found = true;
+                if (!found) {
+                    if (n.label.toLowerCase() == searchTerm) {
+                        n.active = true;
+                        sigInst.zoomTo(n.displayX, n.displayY, 5);
+                        found = true;
+                    }
                 }
             });
 
