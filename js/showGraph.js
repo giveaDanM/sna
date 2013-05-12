@@ -149,7 +149,7 @@ function init() {
                         if (n.label.toLowerCase() == oldValue) {
                             n.active = false;
                             found = true;
-                            sigInst.draw();
+                            sigInst.draw(2,2,2);
                         }
                     }
                 });
