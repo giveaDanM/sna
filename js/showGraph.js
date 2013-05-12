@@ -1,3 +1,5 @@
+var getGraph;
+
 function init() {
     // Instanciate sigma.js and customize rendering :
     var sigInst = sigma.init(document.getElementById('graph')).drawingProperties({
@@ -100,7 +102,31 @@ function init() {
 
     $('#searchbox').bind('keydown', function(event) {
         if (event.which == 13) {
-            
+            if (st.length == 0) {
+                return;
+            }
+            // Reset the graph view
+            sigInst.position(0,0,1).draw();
+
+            found = false;
+            searchTerm = $(event.target).val().toLowerCase();
+            sigInst.iterNodes(function(n) {
+                if (found) {
+                    break;
+                }
+                if (n.label.toLowerCase() == searchTerm) {
+                    n.active = true;
+                    sigInst.zoomTo(n.displayX, n.displayY, 5);
+                    found = true;
+                }
+            });
+
+            if (found) {
+                $('#searchalert').hide();
+            }
+            else {
+                $('#searchalert').show();
+            }
         }
     });
 
@@ -108,7 +134,7 @@ function init() {
     sigInst.activateFishEye().draw();
 
     // Add getter for dev work
-    function getGraph() {
+    getGraph = function() {
         return sigInst;
     }
 }
