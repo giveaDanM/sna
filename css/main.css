@@ -49,6 +49,10 @@ html, body {
     padding: 4px;
 }
 
+.date {
+    font-weight: bold;
+}
+
 .alert {
     color: orangered;
     font: 0.8em "Helvetica Neue",Helvetica,Arial,sans-serif;
