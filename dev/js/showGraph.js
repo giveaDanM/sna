@@ -20,7 +20,7 @@ function init() {
 
     // Parse a GEXF encoded file to fill the graph
     // (requires "sigma.parseGexf.js" to be included)
-    sigInst.parseGexf('data/subreddits.gexf.gz');
+    sigInst.parseGexf('data/subreddits.gexf.gz', 'gzip');
 
     // Bind events :
     var hideUnconnected = function(event) {
