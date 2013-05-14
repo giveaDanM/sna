@@ -1,6 +1,6 @@
 // Mathieu Jacomy @ Sciences Po Médialab & WebAtlas
 // (requires sigma.js to be loaded)
-sigma.publicPrototype.parseGexf = function(gexfPath) {
+sigma.publicPrototype.parseGexf = function(gexfPath, encoding) {
   // Load XML file:
   var gexfhttp, gexf;
   var sigmaInstance = this;
@@ -8,6 +8,9 @@ sigma.publicPrototype.parseGexf = function(gexfPath) {
     new XMLHttpRequest() :
     new ActiveXObject('Microsoft.XMLHTTP');
 
+  if (encoding != undefined) {
+    gexfhttp.setRequestHeader('Accept-Encoding', encoding);
+  }
   gexfhttp.overrideMimeType('text/xml');
   gexfhttp.open('GET', gexfPath, false);
   gexfhttp.send();
