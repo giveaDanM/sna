@@ -1,6 +1,6 @@
 var getGraph;
 
-function init() {
+$(document).ready( function() {
     // Set the graph height first
     $('#graph').css('height',
             $('#graph-wrapper-embedded').height() - $('#controls').height() - $('#footnote-license').height() + "px");
@@ -168,13 +168,4 @@ function init() {
     getGraph = function() {
         return sigInst;
     }
-}
-
-
-if (document.addEventListener) {
-    document.addEventListener("DOMContentLoaded", init, false);
-}
-else {
-    window.onload = init;
-}
-
+})
