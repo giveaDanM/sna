@@ -18,6 +18,10 @@ html, body {
     margin-right:auto;
 }
 
+#graph-wrapper-embedded {
+    display: table;
+}
+
 #graph-wrapper {
     height: 900px;
 }
@@ -30,6 +34,10 @@ html, body {
     border-radius: 7px;
       -moz-border-radius: 7px;
       -webkit-border-radius: 7px;
+}
+
+#graph-wrapper-embedded>div {
+    display: table-row;
 }
 
 .sigma-font {
