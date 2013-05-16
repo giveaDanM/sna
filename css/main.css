@@ -36,6 +36,9 @@ html, body {
       -moz-border-radius: 7px;
       -webkit-border-radius: 7px;
 }
+#graph-wrapper-embedded >#graph {
+    float: none;
+}
 
 #graph-wrapper-embedded>div {
     display: table-row;
