@@ -4,30 +4,31 @@
         <link rel="shortcut icon" href="img/reddit.png" />
         <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet" type="text/css">
         <link rel="stylesheet" type="text/css" href="/sna/css/main.css">
-        <script src="/sna/js/sigma.min.js"></script>
-        <script src="/sna/js/sigma.fisheye.js"></script>
-        <script src="/sna/js/sigma.parseGexf.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-        <script src="/sna/js/showGraph.js"></script>
+        <script type="text/javascript" src="/sna/js/sigma.min.js"></script>
+        <script type="text/javascript" src="/sna/js/sigma.fisheye.js"></script>
+        <script type="text/javascript">
+            var graphData = "../data/subreddits.gexf";
+        </script>
+        <script type="text/javascript" src="/sna/js/sigma.parseGexf.js"></script>
+        <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+        <script type="text/javascript" src="/sna/js/showGraph.js"></script>
     </head>
     <body>
-        <div id="main">
-            <div id="graph-wrapper">
-                <div id="controls">
-                    <button id="reset-graph">Reset graph</button>
-                    <button id="toggle-hiding">Hide unconnected networks</button>
-                    <div id="search">
-                        <input type="search" name="searchbox" id="searchbox" results=5 placeholder="e.g. 'Minecraft'"/>
-                        <div id="searchalert" class="alert">No matches found</div>
-                    </div>
+        <div id="graph-wrapper">
+            <div id="controls">
+                <button id="reset-graph">Reset graph</button>
+                <button id="toggle-hiding">Hide unconnected networks</button>
+                <div id="search">
+                    <input type="search" name="searchbox" id="searchbox" results=5 placeholder="e.g. 'Minecraft'"/>
+                    <div id="searchalert" class="alert">No matches found</div>
                 </div>
-                <div id="graph"></div>
-                <div class="right footnote">Powered by <div class="sigma-font">sigma.js</div>. Best viewed in <a target="_blank" href="http://www.google.com/chrome">Google Chrome</a></div>
             </div>
-            <br />
-            <div id="footnote" class="footnote">
-                This graph was produced with <a target="_blank" class="sigma-font" href="http://sigmajs.org">sigma.js</a> by sharkbait784 in May 2013. You can download the graph in <a target="_blank" href="http://gexf.net/format/">GEXF</a> format <a target="_blank" href="data/subreddits.gexf">here</a>.
-            <div>
+            <div id="graph"></div>
+            <div class="right footnote">Powered by <div class="sigma-font">sigma.js</div>. Best viewed in <a target="_blank" href="http://www.google.com/chrome">Google Chrome</a></div>
         </div>
+        <br />
+        <div id="footnote" class="footnote">
+            This graph was produced with <a target="_blank" class="sigma-font" href="http://sigmajs.org">sigma.js</a> by sharkbait784 in May 2013. You can download the graph in <a target="_blank" href="http://gexf.net/format/">GEXF</a> format <a target="_blank" href="data/subreddits.gexf">here</a>.
+        <div>
     </body>
 </html>
