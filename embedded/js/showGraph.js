@@ -2,7 +2,8 @@ var getGraph;
 
 function init() {
     // Set the graph height first
-    setGraphHeight();
+    $('#graph').css('height',
+            $('#graph-wrapper-embedded').height() - $('#controls').height() - $('#footnote-license').height() + "px");
 
     // Instanciate sigma.js and customize rendering :
     var sigInst = sigma.init(document.getElementById('graph')).drawingProperties({
