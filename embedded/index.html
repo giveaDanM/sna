@@ -8,10 +8,13 @@
         <script type="text/javascript" src="../js/sigma.fisheye.js"></script>
         <script type="text/javascript">
             var graphData = "../data/subreddits.gexf";
+            function setGraphHeight() {
+                $('#graph').css('height', $('#graph-wrapper-embedded').height() - $('#controls').height() - $('#footnote-license').height() + "px");
+            }
         </script>
         <script type="text/javascript" src="../js/sigma.parseGexf.js"></script>
         <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-        <script type="text/javascript" src="../js/showGraph.js"></script>
+        <script type="text/javascript" src="js/showGraph.js"></script>
     </head>
     <body>
         <div id="graph-wrapper-embedded">
@@ -24,11 +27,9 @@
                 </div>
             </div>
             <div id="graph"></div>
-            <div class="right footnote">Powered by <div class="sigma-font">sigma.js</div>. Best viewed in <a target="_blank" href="http://www.google.com/chrome">Google Chrome</a></div>
-            <br />
-            <div id="footnote" class="footnote">
-                This graph was produced by sharkbait784 in May 2013.
-            <div>
+            <div id="footnote-license" class="right footnote">
+                Powered by <div class="sigma-font">sigma.js</div>. This graph was produced by sharkbait784 in May 2013 and may be distributed under the <a href="https://www.gnu.org/copyleft/fdl.html" target="_blank">GFDL</a> License.
+            </div>
         </div>
     </body>
 </html>
