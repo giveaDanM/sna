@@ -5,8 +5,9 @@ $(document).ready( function() {
     var controls = $('#controls');
     var footer = $('#footnote-license');
     var bodyMargin = parseInt($('body').css('margin').replace('px', ''));
+    var footerPadding = parseInt(footer.css('padding').replace('px', ''));
     $('#graph').css('height',
-            $('#graph-wrapper-embedded').height() - (2 * bodyMargin) - $('#controls').height() - $('#footnote-license').height() + "px");
+            $('#graph-wrapper-embedded').height() - (2 * bodyMargin) - (2 * footerPadding) - $('#controls').height() - $('#footnote-license').height() + "px");
 
     // Instanciate sigma.js and customize rendering :
     var sigInst = sigma.init(document.getElementById('graph')).drawingProperties({
