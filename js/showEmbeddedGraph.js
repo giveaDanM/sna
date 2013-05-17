@@ -122,7 +122,7 @@ $(document).ready( function() {
                 if (!found) {
                     if (n.label.toLowerCase() == searchTerm) {
                         n.active = true;
-                        sigInst.zoomTo(n.displayX, n.displayY, 5);
+                        sigInst.zoomTo(n.displayX, n.displayY, 4);
                         found = true;
                     }
                 }
