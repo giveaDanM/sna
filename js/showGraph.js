@@ -1,6 +1,11 @@
 var getGraph;
 
 function init() {
+    if (navigator.appName == "Microsoft Internet Explorer") {
+        $('#graph').css({color:"white", textAlign:"center", verticalAlign:"middle"}).html("Sorry, but this feature is not supported by Internet Explorer. Please try a different web browser.");
+        return;
+    }
+    
     // Instanciate sigma.js and customize rendering :
     var sigInst = sigma.init(document.getElementById('graph')).drawingProperties({
         defaultLabelColor: '#fff',
