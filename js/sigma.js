@@ -124,6 +124,58 @@ sigma.instances = {};
 })();
 
 /**
+ * A jQuery like properties management class. It works like jQuery .css()
+ * method: You can call it with juste one string to get the corresponding
+ * property, with a string and anything else to set the corresponding property,
+ * or directly with an object, and then each pair string / object (or any type)
+ * will be set in the properties.
+ * @constructor
+ * @this {sigma.classes.Cascade}
+ */
+sigma.classes.Cascade = function() {
+  /**
+   * This instance properties.
+   * @protected
+   * @type {Object}
+   */
+  this.p = {};
+
+  /**
+   * The method to use to set/get any property of this instance.
+   * @param  {(string|Object)} a1 If it is a string and if a2 is undefined,
+   *                              then it will return the corresponding
+   *                              property.
+   *                              If it is a string and if a2 is set, then it
+   *                              will set a2 as the property corresponding to
+   *                              a1, and return this.
+   *                              If it is an object, then each pair string /
+   *                              object (or any other type) will be set as a
+   *                              property.
+   * @param  {*?} a2              The new property corresponding to a1 if a1 is
+   *                              a string.
+   * @return {(*|sigma.classes.Cascade)} Returns itself or the corresponding
+   *                                     property.
+   */
+  this.config = function(a1, a2) {
+    if (typeof a1 == 'string' && a2 == undefined) {
+      return this.p[a1];
+    } else {
+      var o = (typeof a1 == 'object' && a2 == undefined) ? a1 : {};
+      if (typeof a1 == 'string') {
+        o[a1] = a2;
+      }
+
+      for (var k in o) {
+        if (this.p[k] != undefined) {
+          this.p[k] = o[k];
+        }
+      }
+      return this;
+    }
+  };
+};
+
+/**
  * sigma.js custom event dispatcher class.
  * @constructor
  * @this {sigma.classes.EventDispatcher}
@@ -271,58 +323,6 @@ sigma.classes.EventDispatcher = function() {
   this.dispatch = dispatch;
 };
 
-/**
- * A jQuery like properties management class. It works like jQuery .css()
- * method: You can call it with juste one string to get the corresponding
- * property, with a string and anything else to set the corresponding property,
- * or directly with an object, and then each pair string / object (or any type)
- * will be set in the properties.
- * @constructor
- * @this {sigma.classes.Cascade}
- */
-sigma.classes.Cascade = function() {
-  /**
-   * This instance properties.
-   * @protected
-   * @type {Object}
-   */
-  this.p = {};
-
-  /**
-   * The method to use to set/get any property of this instance.
-   * @param  {(string|Object)} a1 If it is a string and if a2 is undefined,
-   *                              then it will return the corresponding
-   *                              property.
-   *                              If it is a string and if a2 is set, then it
-   *                              will set a2 as the property corresponding to
-   *                              a1, and return this.
-   *                              If it is an object, then each pair string /
-   *                              object (or any other type) will be set as a
-   *                              property.
-   * @param  {*?} a2              The new property corresponding to a1 if a1 is
-   *                              a string.
-   * @return {(*|sigma.classes.Cascade)} Returns itself or the corresponding
-   *                                     property.
-   */
-  this.config = function(a1, a2) {
-    if (typeof a1 == 'string' && a2 == undefined) {
-      return this.p[a1];
-    } else {
-      var o = (typeof a1 == 'object' && a2 == undefined) ? a1 : {};
-      if (typeof a1 == 'string') {
-        o[a1] = a2;
-      }
-
-      for (var k in o) {
-        if (this.p[k] != undefined) {
-          this.p[k] = o[k];
-        }
-      }
-      return this;
-    }
-  };
-};
-
 (function() {
 // Define local shortcut:
 var id = 0;
@@ -338,614 +338,836 @@ sigma.init = function(dom) {
 };
 
 /**
- * This class draws the graph on the different canvas DOM elements. It just
- * contains all the different methods to draw the graph, synchronously or
- * pseudo-asynchronously.
+ * The graph data model used in sigma.js.
  * @constructor
- * @param {CanvasRenderingContext2D} nodesCtx  Context dedicated to draw nodes.
- * @param {CanvasRenderingContext2D} edgesCtx  Context dedicated to draw edges.
- * @param {CanvasRenderingContext2D} labelsCtx Context dedicated to draw
- *                                             labels.
- * @param {CanvasRenderingContext2D} hoverCtx  Context dedicated to draw hover
- *                                             nodes labels.
- * @param {Graph} graph                        A reference to the graph to
- *                                             draw.
- * @param {number} w                           The width of the DOM root
- *                                             element.
- * @param {number} h                           The width of the DOM root
- *                                             element.
  * @extends sigma.classes.Cascade
- * @this {Plotter}
+ * @extends sigma.classes.EventDispatcher
+ * @this {Graph}
  */
-function Plotter(nodesCtx, edgesCtx, labelsCtx, hoverCtx, graph, w, h) {
+function Graph() {
+  sigma.classes.Cascade.call(this);
+  sigma.classes.EventDispatcher.call(this);
+
+  /**
+   * Represents "this", without the well-known scope issue.
+   * @private
+   * @type {Graph}
+   */
+  var self = this;
+
+  /**
+   * The different parameters that determine how the nodes and edges should be
+   * translated and rescaled.
+   * @type {Object}
+   */
+  this.p = {
+    minNodeSize: 0,
+    maxNodeSize: 0,
+    minEdgeSize: 0,
+    maxEdgeSize: 0,
+    //   Scaling mode:
+    //   - 'inside' (default)
+    //   - 'outside'
+    scalingMode: 'inside',
+    nodesPowRatio: 0.5,
+    edgesPowRatio: 0,
+    // Increasing / decreasing the following parameter will respectively make
+    // arrows bigger / smaller relatively to their edges.
+    arrowRatio: 3
+  };
+
+  /**
+   * Contains the borders of the graph. These are useful to avoid the user to
+   * drag the graph out of the canvas.
+   * @type {Object}
+   */
+  this.borders = {};
+
+  /**
+   * Inserts a node in the graph.
+   * @param {string} id     The node's ID.
+   * @param {object} params An object containing the different parameters
+   *                        of the node.
+   * @return {Graph} Returns itself.
+   */
+  function addNode(id, params) {
+    if (self.nodesIndex[id]) {
+      throw new Error('Node "' + id + '" already exists.');
+    }
+
+    params = params || {};
+    var n = {
+      // Numbers :
+      'x': 0,
+      'y': 0,
+      'size': 1,
+      'degree': 0,
+      'inDegree': 0,
+      'outDegree': 0,
+      // Flags :
+      'fixed': false,
+      'active': false,
+      'hidden': false,
+      'forceLabel': false,
+      // Strings :
+      'label': id.toString(),
+      'id': id.toString(),
+      // Custom attributes :
+      'attr': {}
+    };
+
+    for (var k in params) {
+      switch (k) {
+        case 'id':
+          break;
+        case 'x':
+        case 'y':
+        case 'size':
+          n[k] = +params[k];
+          break;
+        case 'fixed':
+        case 'active':
+        case 'hidden':
+        case 'forceLabel':
+          n[k] = !!params[k];
+          break;
+        case 'color':
+        case 'label':
+          n[k] = params[k];
+          break;
+        default:
+          n['attr'][k] = params[k];
+      }
+    }
+
+    self.nodes.push(n);
+    self.nodesIndex[id.toString()] = n;
+
+    return self;
+  };
+
+  /**
+   * Generates the clone of a node, to make it easier to be exported.
+   * @private
+   * @param  {Object} node The node to clone.
+   * @return {Object} The clone of the node.
+   */
+  function cloneNode(node) {
+    return {
+      'x': node['x'],
+      'y': node['y'],
+      'size': node['size'],
+      'degree': node['degree'],
+      'inDegree': node['inDegree'],
+      'outDegree': node['outDegree'],
+      'displayX': node['displayX'],
+      'displayY': node['displayY'],
+      'displaySize': node['displaySize'],
+      'label': node['label'],
+      'id': node['id'],
+      'color': node['color'],
+      'fixed': node['fixed'],
+      'active': node['active'],
+      'hidden': node['hidden'],
+      'forceLabel': node['forceLabel'],
+      'attr': node['attr']
+    };
+  };
+
+  /**
+   * Checks the clone of a node, and inserts its values when possible. For
+   * example, it is possible to modify the size or the color of a node, but it
+   * is not possible to modify its display values or its id.
+   * @private
+   * @param  {Object} node The original node.
+   * @param  {Object} copy The clone.
+   * @return {Graph} Returns itself.
+   */
+  function checkNode(node, copy) {
+    for (var k in copy) {
+      switch (k) {
+        case 'id':
+        case 'attr':
+        case 'degree':
+        case 'inDegree':
+        case 'outDegree':
+        case 'displayX':
+        case 'displayY':
+        case 'displaySize':
+          break;
+        case 'x':
+        case 'y':
+        case 'size':
+          node[k] = +copy[k];
+          break;
+        case 'fixed':
+        case 'active':
+        case 'hidden':
+        case 'forceLabel':
+          node[k] = !!copy[k];
+          break;
+        case 'color':
+        case 'label':
+          node[k] = (copy[k] || '').toString();
+          break;
+        default:
+          node['attr'][k] = copy[k];
+      }
+    }
+
+    return self;
+  };
+
+  /**
+   * Deletes one or several nodes from the graph, and the related edges.
+   * @param  {(string|Array.<string>)} v A string ID, or an Array of several
+   *                                     IDs.
+   * @return {Graph} Returns itself.
+   */
+  function dropNode(v) {
+    var a = (v instanceof Array ? v : [v]) || [];
+    var nodesIdsToRemove = {};
+
+    // Create hash to make lookups faster
+    a.forEach(function(id) {
+      if (self.nodesIndex[id]) {
+        nodesIdsToRemove[id] = true;
+      } else {
+        sigma.log('Node "' + id + '" does not exist.');
+      }
+    });
+
+    var indexesToRemove = [];
+    self.nodes.forEach(function(n, i) {
+      if (n['id'] in nodesIdsToRemove) {
+        // Add to front, so we have a reverse-sorted list
+        indexesToRemove.unshift(i);
+        // No edges means we are done
+        if (n['degree'] == 0) {
+          delete nodesIdsToRemove[n['id']];
+        }
+      }
+    });
+
+    indexesToRemove.forEach(function(index) {
+      self.nodes.splice(index, 1);
+    });
+
+    self.edges = self.edges.filter(function(e) {
+      if (e['source']['id'] in nodesIdsToRemove) {
+        delete self.edgesIndex[e['id']];
+        e['target']['degree']--;
+        e['target']['inDegree']--;
+        return false;
+      }else if (e['target']['id'] in nodesIdsToRemove) {
+        delete self.edgesIndex[e['id']];
+        e['source']['degree']--;
+        e['source']['outDegree']--;
+        return false;
+      }
+      return true;
+    });
+
+    return self;
+  };
+
+  /**
+   * Inserts an edge in the graph.
+   * @param {string} id     The edge ID.
+   * @param {string} source The ID of the edge source.
+   * @param {string} target The ID of the edge target.
+   * @param {object} params An object containing the different parameters
+   *                        of the edge.
+   * @return {Graph} Returns itself.
+   */
+  function addEdge(id, source, target, params) {
+    if (self.edgesIndex[id]) {
+      throw new Error('Edge "' + id + '" already exists.');
+    }
+
+    if (!self.nodesIndex[source]) {
+      var s = 'Edge\'s source "' + source + '" does not exist yet.';
+      throw new Error(s);
+    }
+
+    if (!self.nodesIndex[target]) {
+      var s = 'Edge\'s target "' + target + '" does not exist yet.';
+      throw new Error(s);
+    }
+
+    params = params || {};
+    var e = {
+      'source': self.nodesIndex[source],
+      'target': self.nodesIndex[target],
+      'size': 1,
+      'weight': 1,
+      'displaySize': 0.5,
+      'label': id.toString(),
+      'id': id.toString(),
+      'hidden': false,
+      'attr': {}
+    };
+
+    e['source']['degree']++;
+    e['source']['outDegree']++;
+    e['target']['degree']++;
+    e['target']['inDegree']++;
+
+    for (var k in params) {
+      switch (k) {
+        case 'id':
+        case 'source':
+        case 'target':
+          break;
+        case 'hidden':
+          e[k] = !!params[k];
+          break;
+        case 'size':
+        case 'weight':
+          e[k] = +params[k];
+          break;
+        case 'color':
+        case 'arrow':
+        case 'type':
+          e[k] = params[k].toString();
+          break;
+        case 'label':
+          e[k] = params[k];
+          break;
+        default:
+          e['attr'][k] = params[k];
+      }
+    }
+
+    self.edges.push(e);
+    self.edgesIndex[id.toString()] = e;
+
+    return self;
+  };
+
+  /**
+   * Generates the clone of a edge, to make it easier to be exported.
+   * @private
+   * @param  {Object} edge The edge to clone.
+   * @return {Object} The clone of the edge.
+   */
+  function cloneEdge(edge) {
+    return {
+      'source': edge['source']['id'],
+      'target': edge['target']['id'],
+      'size': edge['size'],
+      'type': edge['type'],
+      'arrow': edge['arrow'],
+      'weight': edge['weight'],
+      'displaySize': edge['displaySize'],
+      'label': edge['label'],
+      'hidden': edge['hidden'],
+      'id': edge['id'],
+      'attr': edge['attr'],
+      'color': edge['color']
+    };
+  };
+
+  /**
+   * Checks the clone of an edge, and inserts its values when possible. For
+   * example, it is possible to modify the label or the type of an edge, but it
+   * is not possible to modify its display values or its id.
+   * @private
+   * @param  {Object} edge The original edge.
+   * @param  {Object} copy The clone.
+   * @return {Graph} Returns itself.
+   */
+  function checkEdge(edge, copy) {
+    for (var k in copy) {
+      switch (k) {
+        case 'id':
+        case 'displaySize':
+          break;
+        case 'weight':
+        case 'size':
+          edge[k] = +copy[k];
+          break;
+        case 'source':
+        case 'target':
+          edge[k] = self.nodesIndex[k] || edge[k];
+          break;
+        case 'hidden':
+          edge[k] = !!copy[k];
+          break;
+        case 'color':
+        case 'label':
+        case 'arrow':
+        case 'type':
+          edge[k] = (copy[k] || '').toString();
+          break;
+        default:
+          edge['attr'][k] = copy[k];
+      }
+    }
+
+    return self;
+  };
+
+  /**
+   * Deletes one or several edges from the graph.
+   * @param  {(string|Array.<string>)} v A string ID, or an Array of several
+   *                                     IDs.
+   * @return {Graph} Returns itself.
+   */
+  function dropEdge(v) {
+    var a = (v instanceof Array ? v : [v]) || [];
+
+    a.forEach(function(id) {
+      if (self.edgesIndex[id]) {
+        self.edgesIndex[id]['source']['degree']--;
+        self.edgesIndex[id]['source']['outDegree']--;
+        self.edgesIndex[id]['target']['degree']--;
+        self.edgesIndex[id]['target']['inDegree']--;
+
+        var index = null;
+        self.edges.some(function(n, i) {
+          if (n['id'] == id) {
+            index = i;
+            return true;
+          }
+          return false;
+        });
+
+        index != null && self.edges.splice(index, 1);
+        delete self.edgesIndex[id];
+      }else {
+        sigma.log('Edge "' + id + '" does not exist.');
+      }
+    });
+
+    return self;
+  };
+
+  /**
+   * Deletes every nodes and edges from the graph.
+   * @return {Graph} Returns itself.
+   */
+  function empty() {
+    self.nodes = [];
+    self.nodesIndex = {};
+    self.edges = [];
+    self.edgesIndex = {};
+
+    return self;
+  };
+
+  /**
+   * Computes the display x, y and size of each node, relatively to the
+   * original values and the borders determined in the parameters, such as
+   * each node is in the described area.
+   * @param  {number} w           The area width (actually the width of the DOM
+   *                              root).
+   * @param  {number} h           The area height (actually the height of the
+   *                              DOM root).
+   * @param  {boolean} parseNodes Indicates if the nodes have to be parsed.
+   * @param  {boolean} parseEdges Indicates if the edges have to be parsed.
+   * @return {Graph} Returns itself.
+   */
+  function rescale(w, h, parseNodes, parseEdges) {
+    var weightMax = 0, sizeMax = 0;
+
+    parseNodes && self.nodes.forEach(function(node) {
+      sizeMax = Math.max(node['size'], sizeMax);
+    });
+
+    parseEdges && self.edges.forEach(function(edge) {
+      weightMax = Math.max(edge['size'], weightMax);
+    });
+
+    sizeMax = sizeMax || 1;
+    weightMax = weightMax || 1;
+
+    // Recenter the nodes:
+    var xMin, xMax, yMin, yMax;
+    parseNodes && self.nodes.forEach(function(node) {
+      xMax = Math.max(node['x'], xMax || node['x']);
+      xMin = Math.min(node['x'], xMin || node['x']);
+      yMax = Math.max(node['y'], yMax || node['y']);
+      yMin = Math.min(node['y'], yMin || node['y']);
+    });
+
+    // First, we compute the scaling ratio, without considering the sizes
+    // of the nodes : Each node will have its center in the canvas, but might
+    // be partially out of it.
+    var scale = self.p.scalingMode == 'outside' ?
+                Math.max(w / Math.max(xMax - xMin, 1),
+                         h / Math.max(yMax - yMin, 1)) :
+                Math.min(w / Math.max(xMax - xMin, 1),
+                         h / Math.max(yMax - yMin, 1));
+
+    // Then, we correct that scaling ratio considering a margin, which is
+    // basically the size of the biggest node.
+    // This has to be done as a correction since to compare the size of the
+    // biggest node to the X and Y values, we have to first get an
+    // approximation of the scaling ratio.
+    var margin = (self.p.maxNodeSize || sizeMax) / scale;
+    xMax += margin;
+    xMin -= margin;
+    yMax += margin;
+    yMin -= margin;
+
+    scale = self.p.scalingMode == 'outside' ?
+            Math.max(w / Math.max(xMax - xMin, 1),
+                     h / Math.max(yMax - yMin, 1)) :
+            Math.min(w / Math.max(xMax - xMin, 1),
+                     h / Math.max(yMax - yMin, 1));
+
+    // Size homothetic parameters:
+    var a, b;
+    if (!self.p.maxNodeSize && !self.p.minNodeSize) {
+      a = 1;
+      b = 0;
+    }else if (self.p.maxNodeSize == self.p.minNodeSize) {
+      a = 0;
+      b = self.p.maxNodeSize;
+    }else {
+      a = (self.p.maxNodeSize - self.p.minNodeSize) / sizeMax;
+      b = self.p.minNodeSize;
+    }
+
+    var c, d;
+    if (!self.p.maxEdgeSize && !self.p.minEdgeSize) {
+      c = 1;
+      d = 0;
+    }else if (self.p.maxEdgeSize == self.p.minEdgeSize) {
+      c = 0;
+      d = self.p.minEdgeSize;
+    }else {
+      c = (self.p.maxEdgeSize - self.p.minEdgeSize) / weightMax;
+      d = self.p.minEdgeSize;
+    }
+
+    // Rescale the nodes:
+    parseNodes && self.nodes.forEach(function(node) {
+      node['displaySize'] = node['size'] * a + b;
+
+      if (!node['fixed']) {
+        node['displayX'] = (node['x'] - (xMax + xMin) / 2) * scale + w / 2;
+        node['displayY'] = (node['y'] - (yMax + yMin) / 2) * scale + h / 2;
+      }
+    });
+
+    parseEdges && self.edges.forEach(function(edge) {
+      edge['displaySize'] = edge['size'] * c + d;
+    });
+
+    return self;
+  };
+
+  /**
+   * Translates the display values of the nodes and edges relatively to the
+   * scene position and zoom ratio.
+   * @param  {number} sceneX      The x position of the scene.
+   * @param  {number} sceneY      The y position of the scene.
+   * @param  {number} ratio       The zoom ratio of the scene.
+   * @param  {boolean} parseNodes Indicates if the nodes have to be parsed.
+   * @param  {boolean} parseEdges Indicates if the edges have to be parsed.
+   * @return {Graph} Returns itself.
+   */
+  function translate(sceneX, sceneY, ratio, parseNodes, parseEdges) {
+    var sizeRatio = Math.pow(ratio, self.p.nodesPowRatio);
+    parseNodes && self.nodes.forEach(function(node) {
+      if (!node['fixed']) {
+        node['displayX'] = node['displayX'] * ratio + sceneX;
+        node['displayY'] = node['displayY'] * ratio + sceneY;
+      }
+
+      node['displaySize'] = node['displaySize'] * sizeRatio;
+    });
+
+    parseEdges && self.edges.forEach(function(edge) {
+      edge['displaySize'] =
+        edge['displaySize'] *
+        Math.pow(ratio, self.p.edgesPowRatio);
+
+      edge['arrowDisplaySize'] =
+        edge['displaySize'] *
+        self.p.arrowRatio *
+        sizeRatio;
+    });
+
+    return self;
+  };
+
+  /**
+   * Determines the borders of the graph as it will be drawn. It is used to
+   * avoid the user to drag the graph out of the canvas.
+   */
+  function setBorders() {
+    self.borders = {};
+
+    self.nodes.forEach(function(node) {
+      self.borders.minX = Math.min(
+        self.borders.minX == undefined ?
+          node['displayX'] - node['displaySize'] :
+          self.borders.minX,
+        node['displayX'] - node['displaySize']
+      );
+
+      self.borders.maxX = Math.max(
+        self.borders.maxX == undefined ?
+          node['displayX'] + node['displaySize'] :
+          self.borders.maxX,
+        node['displayX'] + node['displaySize']
+      );
+
+      self.borders.minY = Math.min(
+        self.borders.minY == undefined ?
+          node['displayY'] - node['displaySize'] :
+          self.borders.minY,
+        node['displayY'] - node['displaySize']
+      );
+
+      self.borders.maxY = Math.max(
+        self.borders.maxY == undefined ?
+          node['displayY'] - node['displaySize'] :
+          self.borders.maxY,
+        node['displayY'] - node['displaySize']
+      );
+    });
+  }
+
+  /**
+   * Checks which nodes are under the (mX, mY) points, representing the mouse
+   * position.
+   * @param  {number} mX The mouse X position.
+   * @param  {number} mY The mouse Y position.
+   * @return {Graph} Returns itself.
+   */
+  function checkHover(mX, mY) {
+    var dX, dY, s, over = [], out = [];
+    self.nodes.forEach(function(node) {
+      if (node['hidden']) {
+        node['hover'] = false;
+        return;
+      }
+
+      dX = Math.abs(node['displayX'] - mX);
+      dY = Math.abs(node['displayY'] - mY);
+      s = node['displaySize'];
+
+      var oldH = node['hover'];
+      var newH = dX < s && dY < s && Math.sqrt(dX * dX + dY * dY) < s;
+
+      if (oldH && !newH) {
+        node['hover'] = false;
+        out.push(node.id);
+      } else if (newH && !oldH) {
+        node['hover'] = true;
+        over.push(node.id);
+      }
+    });
+
+    over.length && self.dispatch('overnodes', over);
+    out.length && self.dispatch('outnodes', out);
+
+    return self;
+  };
+
+  /**
+   * Applies a function to a clone of each node (or indicated nodes), and then
+   * tries to apply the modifications made on the clones to the original nodes.
+   * @param  {function(Object)} fun The function to execute.
+   * @param  {?Array.<string>} ids  An Array of node IDs (optional).
+   * @return {Graph} Returns itself.
+   */
+  function iterNodes(fun, ids) {
+    var a = ids ? ids.map(function(id) {
+      return self.nodesIndex[id];
+    }) : self.nodes;
+
+    var aCopies = a.map(cloneNode);
+    aCopies.forEach(fun);
+
+    a.forEach(function(n, i) {
+      checkNode(n, aCopies[i]);
+    });
+
+    return self;
+  };
+
+  /**
+   * Applies a function to a clone of each edge (or indicated edges), and then
+   * tries to apply the modifications made on the clones to the original edges.
+   * @param  {function(Object)} fun The function to execute.
+   * @param  {?Array.<string>} ids  An Array of edge IDs (optional).
+   * @return {Graph} Returns itself.
+   */
+  function iterEdges(fun, ids) {
+    var a = ids ? ids.map(function(id) {
+      return self.edgesIndex[id];
+    }) : self.edges;
+
+    var aCopies = a.map(cloneEdge);
+    aCopies.forEach(fun);
+
+    a.forEach(function(e, i) {
+      checkEdge(e, aCopies[i]);
+    });
+
+    return self;
+  };
+
+  /**
+   * Returns a specific node clone or an array of specified node clones.
+   * @param  {(string|Array.<string>)} ids The ID or an array of node IDs.
+   * @return {(Object|Array.<Object>)} The clone or the array of clones.
+   */
+  function getNodes(ids) {
+    var a = ((ids instanceof Array ? ids : [ids]) || []).map(function(id) {
+      return cloneNode(self.nodesIndex[id]);
+    });
+
+    return (ids instanceof Array ? a : a[0]);
+  };
+
+  /**
+   * Returns a specific edge clone or an array of specified edge clones.
+   * @param  {(string|Array.<string>)} ids The ID or an array of edge IDs.
+   * @return {(Object|Array.<Object>)} The clone or the array of clones.
+   */
+  function getEdges(ids) {
+    var a = ((ids instanceof Array ? ids : [ids]) || []).map(function(id) {
+      return cloneEdge(self.edgesIndex[id]);
+    });
+
+    return (ids instanceof Array ? a : a[0]);
+  };
+
+  empty();
+
+  this.addNode = addNode;
+  this.addEdge = addEdge;
+  this.dropNode = dropNode;
+  this.dropEdge = dropEdge;
+
+  this.iterEdges = iterEdges;
+  this.iterNodes = iterNodes;
+
+  this.getEdges = getEdges;
+  this.getNodes = getNodes;
+
+  this.empty = empty;
+  this.rescale = rescale;
+  this.translate = translate;
+  this.setBorders = setBorders;
+  this.checkHover = checkHover;
+}
+
+/**
+ * A class to monitor some local / global probes directly on an instance,
+ * inside a div DOM element.
+ * It executes different methods (called "probes") regularly, and displays
+ * the results on the element.
+ * @constructor
+ * @extends sigma.classes.Cascade
+ * @param {Sigma} instance The instance to monitor.
+ * @param {element} dom    The div DOM element to draw write on.
+ * @this {Monitor}
+ */
+function Monitor(instance, dom) {
   sigma.classes.Cascade.call(this);
 
   /**
    * Represents "this", without the well-known scope issue.
    * @private
-   * @type {Plotter}
+   * @type {Monitor}
    */
   var self = this;
 
   /**
-   * The different parameters that define how this instance should work.
+   * {@link Sigma} instance owning this Monitor instance.
+   * @type {Sigma}
+   */
+  this.instance = instance;
+
+  /**
+   * Determines if the monitoring is activated or not.
+   * @type {Boolean}
+   */
+  this.monitoring = false;
+
+  /**
+   * The different parameters that define how this instance should work. It
+   * also contains the different probes.
    * @see sigma.classes.Cascade
    * @type {Object}
    */
   this.p = {
-    // -------
-    // LABELS:
-    // -------
-    //   Label color:
-    //   - 'node'
-    //   - default (then defaultLabelColor
-    //              will be used instead)
-    labelColor: 'default',
-    defaultLabelColor: '#000',
-    //   Label hover background color:
-    //   - 'node'
-    //   - default (then defaultHoverLabelBGColor
-    //              will be used instead)
-    labelHoverBGColor: 'default',
-    defaultHoverLabelBGColor: '#fff',
-    //   Label hover shadow:
-    labelHoverShadow: true,
-    labelHoverShadowColor: '#000',
-    //   Label hover color:
-    //   - 'node'
-    //   - default (then defaultLabelHoverColor
-    //              will be used instead)
-    labelHoverColor: 'default',
-    defaultLabelHoverColor: '#000',
-    //   Label active background color:
-    //   - 'node'
-    //   - default (then defaultActiveLabelBGColor
-    //              will be used instead)
-    labelActiveBGColor: 'default',
-    defaultActiveLabelBGColor: '#fff',
-    //   Label active shadow:
-    labelActiveShadow: true,
-    labelActiveShadowColor: '#000',
-    //   Label active color:
-    //   - 'node'
-    //   - default (then defaultLabelActiveColor
-    //              will be used instead)
-    labelActiveColor: 'default',
-    defaultLabelActiveColor: '#000',
-    //   Label size:
-    //   - 'fixed'
-    //   - 'proportional'
-    //   Label size:
-    //   - 'fixed'
-    //   - 'proportional'
-    labelSize: 'fixed',
-    defaultLabelSize: 12, // for fixed display only
-    labelSizeRatio: 2,    // for proportional display only
-    labelThreshold: 6,
-    font: 'Arial',
-    hoverFont: '',
-    activeFont: '',
-    fontStyle: '',
-    hoverFontStyle: '',
-    activeFontStyle: '',
-    // ------
-    // EDGES:
-    // ------
-    //   Edge color:
-    //   - 'source'
-    //   - 'target'
-    //   - default (then defaultEdgeColor or edge['color']
-    //              will be used instead)
-    edgeColor: 'source',
-    defaultEdgeColor: '#aaa',
-    defaultEdgeType: 'line',
-    // ------
-    // NODES:
-    // ------
-    defaultNodeColor: '#aaa',
-    // HOVER:
-    //   Node hover color:
-    //   - 'node'
-    //   - default (then defaultNodeHoverColor
-    //              will be used instead)
-    nodeHoverColor: 'node',
-    defaultNodeHoverColor: '#fff',
-    // ACTIVE:
-    //   Node active color:
-    //   - 'node'
-    //   - default (then defaultNodeActiveColor
-    //              will be used instead)
-    nodeActiveColor: 'node',
-    defaultNodeActiveColor: '#fff',
-    //   Node border color:
-    //   - 'node'
-    //   - default (then defaultNodeBorderColor
-    //              will be used instead)
-    borderSize: 0,
-    nodeBorderColor: 'node',
-    defaultNodeBorderColor: '#fff',
-    // --------
-    // PROCESS:
-    // --------
-    edgesSpeed: 200,
-    nodesSpeed: 200,
-    labelsSpeed: 200
+    fps: 40,
+    dom: dom,
+    globalProbes: {
+      'Time (ms)': sigma.chronos.getExecutionTime,
+      'Queue': sigma.chronos.getQueuedTasksCount,
+      'Tasks': sigma.chronos.getTasksCount,
+      'FPS': sigma.chronos.getFPS
+    },
+    localProbes: {
+      'Nodes count': function() { return self.instance.graph.nodes.length; },
+      'Edges count': function() { return self.instance.graph.edges.length; }
+    }
   };
 
   /**
-   * The canvas context dedicated to draw the nodes.
-   * @type {CanvasRenderingContext2D}
+   * Activates the monitoring: Some texts describing some values about sigma.js
+   * or the owning {@link Sigma} instance will appear over the graph, but
+   * beneath the mouse sensible DOM element.
+   * @return {Monitor} Returns itself.
    */
-  var nodesCtx = nodesCtx;
-
-  /**
-   * The canvas context dedicated to draw the edges.
-   * @type {CanvasRenderingContext2D}
-   */
-  var edgesCtx = edgesCtx;
-
-  /**
-   * The canvas context dedicated to draw the labels.
-   * @type {CanvasRenderingContext2D}
-   */
-  var labelsCtx = labelsCtx;
-
-  /**
-   * The canvas context dedicated to draw the hover nodes.
-   * @type {CanvasRenderingContext2D}
-   */
-  var hoverCtx = hoverCtx;
-
-  /**
-   * A reference to the graph to draw.
-   * @type {Graph}
-   */
-  var graph = graph;
-
-  /**
-   * The width of the stage to draw on.
-   * @type {number}
-   */
-  var width = w;
-
-  /**
-   * The height of the stage to draw on.
-   * @type {number}
-   */
-  var height = h;
-
-  /**
-   * The index of the next edge to draw.
-   * @type {number}
-   */
-  this.currentEdgeIndex = 0;
-
-  /**
-   * The index of the next node to draw.
-   * @type {number}
-   */
-  this.currentNodeIndex = 0;
-
-  /**
-   * The index of the next label to draw.
-   * @type {number}
-   */
-  this.currentLabelIndex = 0;
-
-  /**
-   * An atomic function to drawn the N next edges, with N as edgesSpeed.
-   * The counter is {@link this.currentEdgeIndex}.
-   * This function has been designed to work with {@link sigma.chronos}, that
-   * will insert frames at the middle of the calls, to make the edges drawing
-   * process fluid for the user.
-   * @see sigma.chronos
-   * @return {boolean} Returns true if all the edges are drawn and false else.
-   */
-  function task_drawEdge() {
-    var c = graph.edges.length;
-    var s, t, i = 0;
-
-    while (i++< self.p.edgesSpeed && self.currentEdgeIndex < c) {
-      e = graph.edges[self.currentEdgeIndex];
-      s = e['source'];
-      t = e['target'];
-      if (e['hidden'] ||
-          s['hidden'] ||
-          t['hidden'] ||
-          (!self.isOnScreen(s) && !self.isOnScreen(t))) {
-        self.currentEdgeIndex++;
-      }else {
-        drawEdge(graph.edges[self.currentEdgeIndex++]);
-      }
+  function activate() {
+    if (!self.monitoring) {
+      self.monitoring = window.setInterval(routine, 1000 / self.p.fps);
     }
-
-    return self.currentEdgeIndex < c;
-  };
-
-  /**
-   * An atomic function to drawn the N next nodes, with N as nodesSpeed.
-   * The counter is {@link this.currentEdgeIndex}.
-   * This function has been designed to work with {@link sigma.chronos}, that
-   * will insert frames at the middle of the calls, to make the nodes drawing
-   * process fluid for the user.
-   * @see sigma.chronos
-   * @return {boolean} Returns true if all the nodes are drawn and false else.
-   */
-  function task_drawNode() {
-    var c = graph.nodes.length;
-    var i = 0;
-
-    while (i++< self.p.nodesSpeed && self.currentNodeIndex < c) {
-      if (!self.isOnScreen(graph.nodes[self.currentNodeIndex])) {
-        self.currentNodeIndex++;
-      }else {
-        drawNode(graph.nodes[self.currentNodeIndex++]);
-      }
-    }
-
-    return self.currentNodeIndex < c;
-  };
-
-  /**
-   * An atomic function to drawn the N next labels, with N as labelsSpeed.
-   * The counter is {@link this.currentEdgeIndex}.
-   * This function has been designed to work with {@link sigma.chronos}, that
-   * will insert frames at the middle of the calls, to make the labels drawing
-   * process fluid for the user.
-   * @see sigma.chronos
-   * @return {boolean} Returns true if all the labels are drawn and false else.
-   */
-  function task_drawLabel() {
-    var c = graph.nodes.length;
-    var i = 0;
-
-    while (i++< self.p.labelsSpeed && self.currentLabelIndex < c) {
-      if (!self.isOnScreen(graph.nodes[self.currentLabelIndex])) {
-        self.currentLabelIndex++;
-      }else {
-        drawLabel(graph.nodes[self.currentLabelIndex++]);
-      }
-    }
-
-    return self.currentLabelIndex < c;
-  };
-
-  /**
-   * Draws one node to the corresponding canvas.
-   * @param  {Object} node The node to draw.
-   * @return {Plotter} Returns itself.
-   */
-  function drawNode(node) {
-    var size = Math.round(node['displaySize'] * 10) / 10;
-    var ctx = nodesCtx;
-
-    ctx.fillStyle = node['color'];
-    ctx.beginPath();
-    ctx.arc(node['displayX'],
-            node['displayY'],
-            size,
-            0,
-            Math.PI * 2,
-            true);
-
-    ctx.closePath();
-    ctx.fill();
-
-    node['hover'] && drawHoverNode(node);
-    return self;
-  };
-
-  /**
-   * Draws one edge to the corresponding canvas.
-   * @param  {Object} edge The edge to draw.
-   * @return {Plotter} Returns itself.
-   */
-  function drawEdge(edge) {
-    var x1 = edge['source']['displayX'];
-    var y1 = edge['source']['displayY'];
-    var x2 = edge['target']['displayX'];
-    var y2 = edge['target']['displayY'];
-    var color = edge['color'];
-
-    if (!color) {
-      switch (self.p.edgeColor) {
-        case 'source':
-          color = edge['source']['color'] ||
-                  self.p.defaultNodeColor;
-          break;
-        case 'target':
-          color = edge['target']['color'] ||
-                  self.p.defaultNodeColor;
-          break;
-        default:
-          color = self.p.defaultEdgeColor;
-          break;
-      }
-    }
-
-    var ctx = edgesCtx;
-
-    switch (edge['type'] || self.p.defaultEdgeType) {
-      case 'curve':
-        ctx.strokeStyle = color;
-        ctx.lineWidth = edge['displaySize'] / 3;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.quadraticCurveTo((x1 + x2) / 2 + (y2 - y1) / 4,
-                             (y1 + y2) / 2 + (x1 - x2) / 4,
-                             x2,
-                             y2);
-        ctx.stroke();
-        break;
-      case 'line':
-      default:
-        ctx.strokeStyle = color;
-        ctx.lineWidth = edge['displaySize'] / 3;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-
-        ctx.stroke();
-        break;
-    }
-
-    return self;
-  };
-
-  /**
-   * Draws one label to the corresponding canvas.
-   * @param  {Object} node The label to draw.
-   * @return {Plotter} Returns itself.
-   */
-  function drawLabel(node) {
-    var ctx = labelsCtx;
-
-    if (node['displaySize'] >= self.p.labelThreshold || node['forceLabel']) {
-      var fontSize = self.p.labelSize == 'fixed' ?
-                     self.p.defaultLabelSize :
-                     self.p.labelSizeRatio * node['displaySize'];
-
-      ctx.font = self.p.fontStyle + fontSize + 'px ' + self.p.font;
-
-      ctx.fillStyle = self.p.labelColor == 'node' ?
-                      (node['color'] || self.p.defaultNodeColor) :
-                      self.p.defaultLabelColor;
-      ctx.fillText(
-        node['label'],
-        Math.round(node['displayX'] + node['displaySize'] * 1.5),
-        Math.round(node['displayY'] + fontSize / 2 - 3)
-      );
-    }
-
-    return self;
-  };
-
-  /**
-   * Draws one hover node to the corresponding canvas.
-   * @param  {Object} node The hover node to draw.
-   * @return {Plotter} Returns itself.
-   */
-  function drawHoverNode(node) {
-    var ctx = hoverCtx;
-
-    var fontSize = self.p.labelSize == 'fixed' ?
-                   self.p.defaultLabelSize :
-                   self.p.labelSizeRatio * node['displaySize'];
-
-    ctx.font = (self.p.hoverFontStyle || self.p.fontStyle || '') + ' ' +
-               fontSize + 'px ' +
-               (self.p.hoverFont || self.p.font || '');
-
-    ctx.fillStyle = self.p.labelHoverBGColor == 'node' ?
-                    (node['color'] || self.p.defaultNodeColor) :
-                    self.p.defaultHoverLabelBGColor;
-
-    // Label background:
-    ctx.beginPath();
-
-    if (self.p.labelHoverShadow) {
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-      ctx.shadowBlur = 4;
-      ctx.shadowColor = self.p.labelHoverShadowColor;
-    }
-
-    sigma.tools.drawRoundRect(
-      ctx,
-      Math.round(node['displayX'] - fontSize / 2 - 2),
-      Math.round(node['displayY'] - fontSize / 2 - 2),
-      Math.round(ctx.measureText(node['label']).width +
-        node['displaySize'] * 1.5 +
-        fontSize / 2 + 4),
-      Math.round(fontSize + 4),
-      Math.round(fontSize / 2 + 2),
-      'left'
-    );
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    ctx.shadowBlur = 0;
-
-    // Node border:
-    ctx.beginPath();
-    ctx.fillStyle = self.p.nodeBorderColor == 'node' ?
-                    (node['color'] || self.p.defaultNodeColor) :
-                    self.p.defaultNodeBorderColor;
-    ctx.arc(Math.round(node['displayX']),
-            Math.round(node['displayY']),
-            node['displaySize'] + self.p.borderSize,
-            0,
-            Math.PI * 2,
-            true);
-    ctx.closePath();
-    ctx.fill();
-
-    // Node:
-    ctx.beginPath();
-    ctx.fillStyle = self.p.nodeHoverColor == 'node' ?
-                    (node['color'] || self.p.defaultNodeColor) :
-                    self.p.defaultNodeHoverColor;
-    ctx.arc(Math.round(node['displayX']),
-            Math.round(node['displayY']),
-            node['displaySize'],
-            0,
-            Math.PI * 2,
-            true);
-
-    ctx.closePath();
-    ctx.fill();
-
-    // Label:
-    ctx.fillStyle = self.p.labelHoverColor == 'node' ?
-                    (node['color'] || self.p.defaultNodeColor) :
-                    self.p.defaultLabelHoverColor;
-    ctx.fillText(
-      node['label'],
-      Math.round(node['displayX'] + node['displaySize'] * 1.5),
-      Math.round(node['displayY'] + fontSize / 2 - 3)
-    );
-
-    return self;
-  };
-
-  /**
-   * Draws one active node to the corresponding canvas.
-   * @param  {Object} node The active node to draw.
-   * @return {Plotter} Returns itself.
-   */
-  function drawActiveNode(node) {
-    var ctx = hoverCtx;
-
-    if (!isOnScreen(node)) {
-      return self;
-    }
-
-    var fontSize = self.p.labelSize == 'fixed' ?
-                   self.p.defaultLabelSize :
-                   self.p.labelSizeRatio * node['displaySize'];
-
-    ctx.font = (self.p.activeFontStyle || self.p.fontStyle || '') + ' ' +
-               fontSize + 'px ' +
-               (self.p.activeFont || self.p.font || '');
-
-    ctx.fillStyle = self.p.labelHoverBGColor == 'node' ?
-                    (node['color'] || self.p.defaultNodeColor) :
-                    self.p.defaultActiveLabelBGColor;
-
-    // Label background:
-    ctx.beginPath();
-
-    if (self.p.labelActiveShadow) {
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-      ctx.shadowBlur = 4;
-      ctx.shadowColor = self.p.labelActiveShadowColor;
-    }
-
-    sigma.tools.drawRoundRect(
-      ctx,
-      Math.round(node['displayX'] - fontSize / 2 - 2),
-      Math.round(node['displayY'] - fontSize / 2 - 2),
-      Math.round(ctx.measureText(node['label']).width +
-        node['displaySize'] * 1.5 +
-        fontSize / 2 + 4),
-      Math.round(fontSize + 4),
-      Math.round(fontSize / 2 + 2),
-      'left'
-    );
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    ctx.shadowBlur = 0;
-
-    // Node border:
-    ctx.beginPath();
-    ctx.fillStyle = self.p.nodeBorderColor == 'node' ?
-                    (node['color'] || self.p.defaultNodeColor) :
-                    self.p.defaultNodeBorderColor;
-    ctx.arc(Math.round(node['displayX']),
-            Math.round(node['displayY']),
-            node['displaySize'] + self.p.borderSize,
-            0,
-            Math.PI * 2,
-            true);
-    ctx.closePath();
-    ctx.fill();
-
-    // Node:
-    ctx.beginPath();
-    ctx.fillStyle = self.p.nodeActiveColor == 'node' ?
-                    (node['color'] || self.p.defaultNodeColor) :
-                    self.p.defaultNodeActiveColor;
-    ctx.arc(Math.round(node['displayX']),
-            Math.round(node['displayY']),
-            node['displaySize'],
-            0,
-            Math.PI * 2,
-            true);
-
-    ctx.closePath();
-    ctx.fill();
-
-    // Label:
-    ctx.fillStyle = self.p.labelActiveColor == 'node' ?
-                    (node['color'] || self.p.defaultNodeColor) :
-                    self.p.defaultLabelActiveColor;
-    ctx.fillText(
-      node['label'],
-      Math.round(node['displayX'] + node['displaySize'] * 1.5),
-      Math.round(node['displayY'] + fontSize / 2 - 3)
-    );
-
-    return self;
-  };
-
-  /**
-   * Determines if a node is on the screen or not. The limits here are
-   * bigger than the actual screen, to avoid seeing labels disappear during
-   * the graph manipulation.
-   * @param  {Object}  node The node to check if it is on or out the screen.
-   * @return {boolean} Returns false if the node is hidden or not on the screen
-   *                   or true else.
-   */
-  function isOnScreen(node) {
-    if (isNaN(node['x']) || isNaN(node['y'])) {
-      throw (new Error('A node\'s coordinate is not a ' +
-                       'number (id: ' + node['id'] + ')')
-      );
-    }
-
-    return !node['hidden'] &&
-           (node['displayX'] + node['displaySize'] > -width / 3) &&
-           (node['displayX'] - node['displaySize'] < width * 4 / 3) &&
-           (node['displayY'] + node['displaySize'] > -height / 3) &&
-           (node['displayY'] - node['displaySize'] < height * 4 / 3);
-  };
-
-  /**
-   * Resizes this instance.
-   * @param  {number} w The new width.
-   * @param  {number} h The new height.
-   * @return {Plotter} Returns itself.
-   */
-  function resize(w, h) {
-    width = w;
-    height = h;
 
     return self;
   }
 
-  this.task_drawLabel = task_drawLabel;
-  this.task_drawEdge = task_drawEdge;
-  this.task_drawNode = task_drawNode;
-  this.drawActiveNode = drawActiveNode;
-  this.drawHoverNode = drawHoverNode;
-  this.isOnScreen = isOnScreen;
-  this.resize = resize;
+  /**
+   * Desactivates the monitoring: Will disappear, and stop computing the
+   * different probes.
+   * @return {Monitor} Returns itself.
+   */
+  function desactivate() {
+    if (self.monitoring) {
+      window.clearInterval(self.monitoring);
+      self.monitoring = null;
+
+      self.p.dom.innerHTML = '';
+    }
+
+    return self;
+  }
+
+  /**
+   * The private method dedicated to compute the different values to observe.
+   * @private
+   * @return {Monitor} Returns itself.
+   */
+  function routine() {
+    var s = '';
+
+    s += '<p>GLOBAL :</p>';
+    for (var k in self.p.globalProbes) {
+      s += '<p>' + k + ' : ' + self.p.globalProbes[k]() + '</p>';
+    }
+
+    s += '<br><p>LOCAL :</p>';
+    for (var k in self.p.localProbes) {
+      s += '<p>' + k + ' : ' + self.p.localProbes[k]() + '</p>';
+    }
+
+    self.p.dom.innerHTML = s;
+
+    return self;
+  }
+
+  this.activate = activate;
+  this.desactivate = desactivate;
 }
 
 /**
@@ -1358,330 +1580,760 @@ function MouseCaptor(dom) {
   this.interpolate = startInterpolate;
 }
 
-function SigmaPublic(sigmaInstance) {
-  var s = sigmaInstance;
-  var self = this;
-  sigma.classes.EventDispatcher.call(this);
-
-  this._core = sigmaInstance;
-
-  this.kill = function() {
-    // TODO
-  };
-
-  this.getID = function() {
-    return s.id;
-  };
-
-  // Config:
-  this.configProperties = function(a1, a2) {
-    var res = s.config(a1, a2);
-    return res == s ? self : res;
-  };
-
-  this.drawingProperties = function(a1, a2) {
-    var res = s.plotter.config(a1, a2);
-    return res == s.plotter ? self : res;
-  };
-
-  this.mouseProperties = function(a1, a2) {
-    var res = s.mousecaptor.config(a1, a2);
-    return res == s.mousecaptor ? self : res;
-  };
-
-  this.graphProperties = function(a1, a2) {
-    var res = s.graph.config(a1, a2);
-    return res == s.graph ? self : res;
-  };
-
-  this.getMouse = function() {
-    return {
-      mouseX: s.mousecaptor.mouseX,
-      mouseY: s.mousecaptor.mouseY,
-      down: s.mousecaptor.isMouseDown
-    };
-  };
-
-  // Actions:
-  this.position = function(stageX, stageY, ratio) {
-    if (arguments.length == 0) {
-      return {
-        stageX: s.mousecaptor.stageX,
-        stageY: s.mousecaptor.stageY,
-        ratio: s.mousecaptor.ratio
-      };
-    }else {
-      s.mousecaptor.stageX = stageX != undefined ?
-        stageX :
-        s.mousecaptor.stageX;
-      s.mousecaptor.stageY = stageY != undefined ?
-        stageY :
-        s.mousecaptor.stageY;
-      s.mousecaptor.ratio = ratio != undefined ?
-        ratio :
-        s.mousecaptor.ratio;
-
-      return self;
-    }
-  };
-
-  this.goTo = function(stageX, stageY, ratio) {
-    s.mousecaptor.interpolate(stageX, stageY, ratio);
-    return self;
-  };
-
-  this.zoomTo = function(x, y, ratio) {
-    ratio = Math.min(
-              Math.max(s.mousecaptor.config('minRatio'), ratio),
-              s.mousecaptor.config('maxRatio')
-            );
-    if (ratio == s.mousecaptor.ratio) {
-      s.mousecaptor.interpolate(
-        x - s.width / 2 + s.mousecaptor.stageX,
-        y - s.height / 2 + s.mousecaptor.stageY
-      );
-    }else {
-      s.mousecaptor.interpolate(
-        (ratio * x - s.mousecaptor.ratio * s.width/2) /
-        (ratio - s.mousecaptor.ratio),
-        (ratio * y - s.mousecaptor.ratio * s.height/2) /
-        (ratio - s.mousecaptor.ratio),
-        ratio
-      );
-    }
-    return self;
-  };
-
-  this.resize = function(w, h) {
-    s.resize(w, h);
-    return self;
-  };
-
-  this.draw = function(nodes, edges, labels, safe) {
-    s.draw(nodes, edges, labels, safe);
-    return self;
-  };
-
-  this.refresh = function() {
-    s.refresh();
-    return self;
-  };
-
-  // Tasks methods:
-  this.addGenerator = function(id, task, condition) {
-    sigma.chronos.addGenerator(id + '_ext_' + s.id, task, condition);
-    return self;
-  };
-
-  this.removeGenerator = function(id) {
-    sigma.chronos.removeGenerator(id + '_ext_' + s.id);
-    return self;
-  };
-
-  // Graph methods:
-  this.addNode = function(id, params) {
-    s.graph.addNode(id, params);
-    return self;
-  };
-
-  this.addEdge = function(id, source, target, params) {
-    s.graph.addEdge(id, source, target, params);
-    return self;
-  }
-
-  this.dropNode = function(v) {
-    s.graph.dropNode(v);
-    return self;
-  };
-
-  this.dropEdge = function(v) {
-    s.graph.dropEdge(v);
-    return self;
-  };
-
-  this.pushGraph = function(object, safe) {
-    object.nodes && object.nodes.forEach(function(node) {
-      node['id'] && (!safe || !s.graph.nodesIndex[node['id']]) &&
-                    self.addNode(node['id'], node);
-    });
-
-    var isEdgeValid;
-    object.edges && object.edges.forEach(function(edge) {
-      validID = edge['source'] && edge['target'] && edge['id'];
-      validID &&
-        (!safe || !s.graph.edgesIndex[edge['id']]) &&
-        self.addNode(
-          edge['id'],
-          edge['source'],
-          edge['target'],
-          edge
-        );
-    });
-
-    return self;
-  };
-
-  this.emptyGraph = function() {
-    s.graph.empty();
-    return self;
-  };
-
-  this.getNodesCount = function() {
-    return s.graph.nodes.length;
-  };
-
-  this.getEdgesCount = function() {
-    return s.graph.edges.length;
-  };
-
-  this.iterNodes = function(fun, ids) {
-    s.graph.iterNodes(fun, ids);
-    return self;
-  };
-
-  this.iterEdges = function(fun, ids) {
-    s.graph.iterEdges(fun, ids);
-    return self;
-  };
-
-  this.getNodes = function(ids) {
-    return s.graph.getNodes(ids);
-  };
-
-  this.getEdges = function(ids) {
-    return s.graph.getEdges(ids);
-  };
-
-  // Monitoring
-  this.activateMonitoring = function() {
-    return s.monitor.activate();
-  };
-
-  this.desactivateMonitoring = function() {
-    return s.monitor.desactivate();
-  };
-
-  // Events
-  s.bind('downnodes upnodes downgraph upgraph', function(e) {
-    self.dispatch(e.type, e.content);
-  });
-
-  s.graph.bind('overnodes outnodes', function(e) {
-    self.dispatch(e.type, e.content);
-  });
-}
-
 /**
- * A class to monitor some local / global probes directly on an instance,
- * inside a div DOM element.
- * It executes different methods (called "probes") regularly, and displays
- * the results on the element.
+ * This class draws the graph on the different canvas DOM elements. It just
+ * contains all the different methods to draw the graph, synchronously or
+ * pseudo-asynchronously.
  * @constructor
+ * @param {CanvasRenderingContext2D} nodesCtx  Context dedicated to draw nodes.
+ * @param {CanvasRenderingContext2D} edgesCtx  Context dedicated to draw edges.
+ * @param {CanvasRenderingContext2D} labelsCtx Context dedicated to draw
+ *                                             labels.
+ * @param {CanvasRenderingContext2D} hoverCtx  Context dedicated to draw hover
+ *                                             nodes labels.
+ * @param {Graph} graph                        A reference to the graph to
+ *                                             draw.
+ * @param {number} w                           The width of the DOM root
+ *                                             element.
+ * @param {number} h                           The width of the DOM root
+ *                                             element.
  * @extends sigma.classes.Cascade
- * @param {Sigma} instance The instance to monitor.
- * @param {element} dom    The div DOM element to draw write on.
- * @this {Monitor}
+ * @this {Plotter}
  */
-function Monitor(instance, dom) {
+function Plotter(nodesCtx, edgesCtx, labelsCtx, hoverCtx, graph, w, h) {
   sigma.classes.Cascade.call(this);
 
   /**
    * Represents "this", without the well-known scope issue.
    * @private
-   * @type {Monitor}
+   * @type {Plotter}
    */
   var self = this;
 
   /**
-   * {@link Sigma} instance owning this Monitor instance.
-   * @type {Sigma}
-   */
-  this.instance = instance;
-
-  /**
-   * Determines if the monitoring is activated or not.
-   * @type {Boolean}
-   */
-  this.monitoring = false;
-
-  /**
-   * The different parameters that define how this instance should work. It
-   * also contains the different probes.
+   * The different parameters that define how this instance should work.
    * @see sigma.classes.Cascade
    * @type {Object}
    */
   this.p = {
-    fps: 40,
-    dom: dom,
-    globalProbes: {
-      'Time (ms)': sigma.chronos.getExecutionTime,
-      'Queue': sigma.chronos.getQueuedTasksCount,
-      'Tasks': sigma.chronos.getTasksCount,
-      'FPS': sigma.chronos.getFPS
-    },
-    localProbes: {
-      'Nodes count': function() { return self.instance.graph.nodes.length; },
-      'Edges count': function() { return self.instance.graph.edges.length; }
-    }
+    // -------
+    // LABELS:
+    // -------
+    //   Label color:
+    //   - 'node'
+    //   - default (then defaultLabelColor
+    //              will be used instead)
+    labelColor: 'default',
+    defaultLabelColor: '#000',
+    //   Label hover background color:
+    //   - 'node'
+    //   - default (then defaultHoverLabelBGColor
+    //              will be used instead)
+    labelHoverBGColor: 'default',
+    defaultHoverLabelBGColor: '#fff',
+    //   Label hover shadow:
+    labelHoverShadow: true,
+    labelHoverShadowColor: '#000',
+    //   Label hover color:
+    //   - 'node'
+    //   - default (then defaultLabelHoverColor
+    //              will be used instead)
+    labelHoverColor: 'default',
+    defaultLabelHoverColor: '#000',
+    //   Label active background color:
+    //   - 'node'
+    //   - default (then defaultActiveLabelBGColor
+    //              will be used instead)
+    labelActiveBGColor: 'default',
+    defaultActiveLabelBGColor: '#fff',
+    //   Label active shadow:
+    labelActiveShadow: true,
+    labelActiveShadowColor: '#000',
+    //   Label active color:
+    //   - 'node'
+    //   - default (then defaultLabelActiveColor
+    //              will be used instead)
+    labelActiveColor: 'default',
+    defaultLabelActiveColor: '#000',
+    //   Label size:
+    //   - 'fixed'
+    //   - 'proportional'
+    //   Label size:
+    //   - 'fixed'
+    //   - 'proportional'
+    labelSize: 'fixed',
+    defaultLabelSize: 12, // for fixed display only
+    labelSizeRatio: 2,    // for proportional display only
+    labelThreshold: 6,
+    font: 'Arial',
+    hoverFont: '',
+    activeFont: '',
+    fontStyle: '',
+    hoverFontStyle: '',
+    activeFontStyle: '',
+    // ------
+    // EDGES:
+    // ------
+    //   Edge color:
+    //   - 'source'
+    //   - 'target'
+    //   - default (then defaultEdgeColor or edge['color']
+    //              will be used instead)
+    edgeColor: 'source',
+    defaultEdgeColor: '#aaa',
+    defaultEdgeType: 'line',
+    defaultEdgeArrow: 'none',
+    // ------
+    // NODES:
+    // ------
+    defaultNodeColor: '#aaa',
+    // HOVER:
+    //   Node hover color:
+    //   - 'node'
+    //   - default (then defaultNodeHoverColor
+    //              will be used instead)
+    nodeHoverColor: 'node',
+    defaultNodeHoverColor: '#fff',
+    // ACTIVE:
+    //   Node active color:
+    //   - 'node'
+    //   - default (then defaultNodeActiveColor
+    //              will be used instead)
+    nodeActiveColor: 'node',
+    defaultNodeActiveColor: '#fff',
+    //   Node border color:
+    //   - 'node'
+    //   - default (then defaultNodeBorderColor
+    //              will be used instead)
+    borderSize: 0,
+    nodeBorderColor: 'node',
+    defaultNodeBorderColor: '#fff',
+    // --------
+    // PROCESS:
+    // --------
+    edgesSpeed: 200,
+    nodesSpeed: 200,
+    labelsSpeed: 200
   };
 
   /**
-   * Activates the monitoring: Some texts describing some values about sigma.js
-   * or the owning {@link Sigma} instance will appear over the graph, but
-   * beneath the mouse sensible DOM element.
-   * @return {Monitor} Returns itself.
+   * The canvas context dedicated to draw the nodes.
+   * @type {CanvasRenderingContext2D}
    */
-  function activate() {
-    if (!self.monitoring) {
-      self.monitoring = window.setInterval(routine, 1000 / self.p.fps);
-    }
-
-    return self;
-  }
+  var nodesCtx = nodesCtx;
 
   /**
-   * Desactivates the monitoring: Will disappear, and stop computing the
-   * different probes.
-   * @return {Monitor} Returns itself.
+   * The canvas context dedicated to draw the edges.
+   * @type {CanvasRenderingContext2D}
    */
-  function desactivate() {
-    if (self.monitoring) {
-      window.clearInterval(self.monitoring);
-      self.monitoring = null;
-
-      self.p.dom.innerHTML = '';
-    }
-
-    return self;
-  }
+  var edgesCtx = edgesCtx;
 
   /**
-   * The private method dedicated to compute the different values to observe.
-   * @private
-   * @return {Monitor} Returns itself.
+   * The canvas context dedicated to draw the labels.
+   * @type {CanvasRenderingContext2D}
    */
-  function routine() {
-    var s = '';
+  var labelsCtx = labelsCtx;
 
-    s += '<p>GLOBAL :</p>';
-    for (var k in self.p.globalProbes) {
-      s += '<p>' + k + ' : ' + self.p.globalProbes[k]() + '</p>';
+  /**
+   * The canvas context dedicated to draw the hover nodes.
+   * @type {CanvasRenderingContext2D}
+   */
+  var hoverCtx = hoverCtx;
+
+  /**
+   * A reference to the graph to draw.
+   * @type {Graph}
+   */
+  var graph = graph;
+
+  /**
+   * The width of the stage to draw on.
+   * @type {number}
+   */
+  var width = w;
+
+  /**
+   * The height of the stage to draw on.
+   * @type {number}
+   */
+  var height = h;
+
+  /**
+   * The index of the next edge to draw.
+   * @type {number}
+   */
+  this.currentEdgeIndex = 0;
+
+  /**
+   * The index of the next node to draw.
+   * @type {number}
+   */
+  this.currentNodeIndex = 0;
+
+  /**
+   * The index of the next label to draw.
+   * @type {number}
+   */
+  this.currentLabelIndex = 0;
+
+  /**
+   * An atomic function to drawn the N next edges, with N as edgesSpeed.
+   * The counter is {@link this.currentEdgeIndex}.
+   * This function has been designed to work with {@link sigma.chronos}, that
+   * will insert frames at the middle of the calls, to make the edges drawing
+   * process fluid for the user.
+   * @see sigma.chronos
+   * @return {boolean} Returns true if all the edges are drawn and false else.
+   */
+  function task_drawEdge() {
+    var c = graph.edges.length;
+    var s, t, i = 0;
+
+    while (i++< self.p.edgesSpeed && self.currentEdgeIndex < c) {
+      e = graph.edges[self.currentEdgeIndex];
+      s = e['source'];
+      t = e['target'];
+      if (e['hidden'] ||
+          s['hidden'] ||
+          t['hidden'] ||
+          (!self.isOnScreen(s) && !self.isOnScreen(t))) {
+        self.currentEdgeIndex++;
+      }else {
+        drawEdge(graph.edges[self.currentEdgeIndex++]);
+      }
     }
 
-    s += '<br><p>LOCAL :</p>';
-    for (var k in self.p.localProbes) {
-      s += '<p>' + k + ' : ' + self.p.localProbes[k]() + '</p>';
+    return self.currentEdgeIndex < c;
+  };
+
+  /**
+   * An atomic function to drawn the N next nodes, with N as nodesSpeed.
+   * The counter is {@link this.currentEdgeIndex}.
+   * This function has been designed to work with {@link sigma.chronos}, that
+   * will insert frames at the middle of the calls, to make the nodes drawing
+   * process fluid for the user.
+   * @see sigma.chronos
+   * @return {boolean} Returns true if all the nodes are drawn and false else.
+   */
+  function task_drawNode() {
+    var c = graph.nodes.length;
+    var i = 0;
+
+    while (i++< self.p.nodesSpeed && self.currentNodeIndex < c) {
+      if (!self.isOnScreen(graph.nodes[self.currentNodeIndex])) {
+        self.currentNodeIndex++;
+      }else {
+        drawNode(graph.nodes[self.currentNodeIndex++]);
+      }
     }
 
-    self.p.dom.innerHTML = s;
+    return self.currentNodeIndex < c;
+  };
+
+  /**
+   * An atomic function to drawn the N next labels, with N as labelsSpeed.
+   * The counter is {@link this.currentEdgeIndex}.
+   * This function has been designed to work with {@link sigma.chronos}, that
+   * will insert frames at the middle of the calls, to make the labels drawing
+   * process fluid for the user.
+   * @see sigma.chronos
+   * @return {boolean} Returns true if all the labels are drawn and false else.
+   */
+  function task_drawLabel() {
+    var c = graph.nodes.length;
+    var i = 0;
+
+    while (i++< self.p.labelsSpeed && self.currentLabelIndex < c) {
+      if (!self.isOnScreen(graph.nodes[self.currentLabelIndex])) {
+        self.currentLabelIndex++;
+      }else {
+        drawLabel(graph.nodes[self.currentLabelIndex++]);
+      }
+    }
+
+    return self.currentLabelIndex < c;
+  };
+
+  /**
+   * Draws one node to the corresponding canvas.
+   * @param  {Object} node The node to draw.
+   * @return {Plotter} Returns itself.
+   */
+  function drawNode(node) {
+    var size = Math.round(node['displaySize'] * 10) / 10;
+    var ctx = nodesCtx;
+
+    ctx.fillStyle = node['color'];
+    ctx.beginPath();
+    ctx.arc(node['displayX'],
+            node['displayY'],
+            size,
+            0,
+            Math.PI * 2,
+            true);
+
+    ctx.closePath();
+    ctx.fill();
+
+    node['hover'] && drawHoverNode(node);
+    return self;
+  };
+
+  /**
+   * Draws one edge to the corresponding canvas.
+   * @param  {Object} edge The edge to draw.
+   * @return {Plotter} Returns itself.
+   */
+  function drawEdge(edge) {
+    // Using array for coordinates so we can easily modify/return from
+    // applyArrow():
+    var sourceCoordinates = [
+          edge['source']['displayX'],
+          edge['source']['displayY']
+        ],
+        targetCoordinates = [
+          edge['target']['displayX'],
+          edge['target']['displayY']
+        ],
+        color = edge['color'];
+
+    if (!color) {
+      switch (self.p.edgeColor) {
+        case 'source':
+          color = edge['source']['color'] ||
+                  self.p.defaultNodeColor;
+          break;
+        case 'target':
+          color = edge['target']['color'] ||
+                  self.p.defaultNodeColor;
+          break;
+        default:
+          color = self.p.defaultEdgeColor;
+          break;
+      }
+    }
+
+    var ctx = edgesCtx;
+
+    switch (edge['type'] || self.p.defaultEdgeType) {
+      case 'curve':
+        ctx.strokeStyle = color;
+
+        var controlPointX =
+              (sourceCoordinates[0] + targetCoordinates[0]) / 2 +
+              (targetCoordinates[1] - sourceCoordinates[1]) / 4,
+            controlPointY =
+              (sourceCoordinates[1] + targetCoordinates[1]) / 2 +
+              (sourceCoordinates[0] - targetCoordinates[0]) / 4;
+
+        // Assignment is redundant here but makes it clear that this call
+        // mutates sourceCoordinates:
+        if (isArrowDrawRequired('source', edge['arrow'])) {
+          sourceCoordinates = applyArrow(
+            ctx,
+            sourceCoordinates,
+            edge['source']['displaySize'],
+            controlPointX,
+            controlPointY,
+            edge['arrowDisplaySize']
+          );
+        }
+
+        // Assignment is redundant here but makes it clear that this call
+        // mutates targetCoordinates:
+        if (isArrowDrawRequired('target', edge['arrow'])) {
+          targetCoordinates = applyArrow(
+            ctx,
+            targetCoordinates,
+            edge['target']['displaySize'],
+            controlPointX,
+            controlPointY,
+            edge['arrowDisplaySize']
+          );
+        }
+
+        ctx.lineWidth = edge['displaySize'] / 3;
+        ctx.beginPath();
+        ctx.moveTo(sourceCoordinates[0], sourceCoordinates[1]);
+        ctx.quadraticCurveTo(controlPointX,
+                             controlPointY,
+                             targetCoordinates[0],
+                             targetCoordinates[1]);
+
+        ctx.stroke();
+        break;
+      case 'line':
+      default:
+        ctx.strokeStyle = color;
+
+        // Assignment is redundant here but makes it clear that this call
+        // mutates sourceCoordinates:
+        if (isArrowDrawRequired('source', edge['arrow'])) {
+          sourceCoordinates = applyArrow(ctx,
+            sourceCoordinates,
+            edge['source']['displaySize'],
+            targetCoordinates[0],
+            targetCoordinates[1],
+            edge['arrowDisplaySize']
+          );
+        }
+
+        // Assignment is redundant here but makes it clear that this call
+        // mutates targetCoordinates:
+        if (isArrowDrawRequired('target', edge['arrow'])) {
+          targetCoordinates = applyArrow(ctx,
+            targetCoordinates,
+            edge['target']['displaySize'],
+            sourceCoordinates[0],
+            sourceCoordinates[1],
+            edge['arrowDisplaySize']
+          );
+        }
+
+        ctx.lineWidth = edge['displaySize'] / 3;
+        ctx.beginPath();
+        ctx.moveTo(sourceCoordinates[0], sourceCoordinates[1]);
+        ctx.lineTo(targetCoordinates[0], targetCoordinates[1]);
+
+        ctx.stroke();
+        break;
+    }
 
     return self;
-  }
+  };
 
-  this.activate = activate;
-  this.desactivate = desactivate;
+  /**
+   * Draws one label to the corresponding canvas.
+   * @param  {Object} node The label to draw.
+   * @return {Plotter} Returns itself.
+   */
+  function drawLabel(node) {
+    var ctx = labelsCtx;
+
+    if (node['displaySize'] >= self.p.labelThreshold || node['forceLabel']) {
+      var fontSize = self.p.labelSize == 'fixed' ?
+                     self.p.defaultLabelSize :
+                     self.p.labelSizeRatio * node['displaySize'];
+
+      ctx.font = self.p.fontStyle + fontSize + 'px ' + self.p.font;
+
+      ctx.fillStyle = self.p.labelColor == 'node' ?
+                      (node['color'] || self.p.defaultNodeColor) :
+                      self.p.defaultLabelColor;
+      ctx.fillText(
+        node['label'],
+        Math.round(node['displayX'] + node['displaySize'] * 1.5),
+        Math.round(node['displayY'] + fontSize / 2 - 3)
+      );
+    }
+
+    return self;
+  };
+
+  /**
+   * Draws one hover node to the corresponding canvas.
+   * @param  {Object} node The hover node to draw.
+   * @return {Plotter} Returns itself.
+   */
+  function drawHoverNode(node) {
+    var ctx = hoverCtx;
+
+    var fontSize = self.p.labelSize == 'fixed' ?
+                   self.p.defaultLabelSize :
+                   self.p.labelSizeRatio * node['displaySize'];
+
+    ctx.font = (self.p.hoverFontStyle || self.p.fontStyle || '') + ' ' +
+               fontSize + 'px ' +
+               (self.p.hoverFont || self.p.font || '');
+
+    ctx.fillStyle = self.p.labelHoverBGColor == 'node' ?
+                    (node['color'] || self.p.defaultNodeColor) :
+                    self.p.defaultHoverLabelBGColor;
+
+    // Label background:
+    ctx.beginPath();
+
+    if (self.p.labelHoverShadow) {
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.shadowBlur = 4;
+      ctx.shadowColor = self.p.labelHoverShadowColor;
+    }
+
+    sigma.tools.drawRoundRect(
+      ctx,
+      Math.round(node['displayX'] - fontSize / 2 - 2),
+      Math.round(node['displayY'] - fontSize / 2 - 2),
+      Math.round(ctx.measureText(node['label']).width +
+        node['displaySize'] * 1.5 +
+        fontSize / 2 + 4),
+      Math.round(fontSize + 4),
+      Math.round(fontSize / 2 + 2),
+      'left'
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.shadowBlur = 0;
+
+    // Node border:
+    ctx.beginPath();
+    ctx.fillStyle = self.p.nodeBorderColor == 'node' ?
+                    (node['color'] || self.p.defaultNodeColor) :
+                    self.p.defaultNodeBorderColor;
+    ctx.arc(Math.round(node['displayX']),
+            Math.round(node['displayY']),
+            node['displaySize'] + self.p.borderSize,
+            0,
+            Math.PI * 2,
+            true);
+    ctx.closePath();
+    ctx.fill();
+
+    // Node:
+    ctx.beginPath();
+    ctx.fillStyle = self.p.nodeHoverColor == 'node' ?
+                    (node['color'] || self.p.defaultNodeColor) :
+                    self.p.defaultNodeHoverColor;
+    ctx.arc(Math.round(node['displayX']),
+            Math.round(node['displayY']),
+            node['displaySize'],
+            0,
+            Math.PI * 2,
+            true);
+
+    ctx.closePath();
+    ctx.fill();
+
+    // Label:
+    ctx.fillStyle = self.p.labelHoverColor == 'node' ?
+                    (node['color'] || self.p.defaultNodeColor) :
+                    self.p.defaultLabelHoverColor;
+    ctx.fillText(
+      node['label'],
+      Math.round(node['displayX'] + node['displaySize'] * 1.5),
+      Math.round(node['displayY'] + fontSize / 2 - 3)
+    );
+
+    return self;
+  };
+
+  /**
+   * Draws one active node to the corresponding canvas.
+   * @param  {Object} node The active node to draw.
+   * @return {Plotter} Returns itself.
+   */
+  function drawActiveNode(node) {
+    var ctx = hoverCtx;
+
+    if (!isOnScreen(node)) {
+      return self;
+    }
+
+    var fontSize = self.p.labelSize == 'fixed' ?
+                   self.p.defaultLabelSize :
+                   self.p.labelSizeRatio * node['displaySize'];
+
+    ctx.font = (self.p.activeFontStyle || self.p.fontStyle || '') + ' ' +
+               fontSize + 'px ' +
+               (self.p.activeFont || self.p.font || '');
+
+    ctx.fillStyle = self.p.labelHoverBGColor == 'node' ?
+                    (node['color'] || self.p.defaultNodeColor) :
+                    self.p.defaultActiveLabelBGColor;
+
+    // Label background:
+    ctx.beginPath();
+
+    if (self.p.labelActiveShadow) {
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.shadowBlur = 4;
+      ctx.shadowColor = self.p.labelActiveShadowColor;
+    }
+
+    sigma.tools.drawRoundRect(
+      ctx,
+      Math.round(node['displayX'] - fontSize / 2 - 2),
+      Math.round(node['displayY'] - fontSize / 2 - 2),
+      Math.round(ctx.measureText(node['label']).width +
+        node['displaySize'] * 1.5 +
+        fontSize / 2 + 4),
+      Math.round(fontSize + 4),
+      Math.round(fontSize / 2 + 2),
+      'left'
+    );
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.shadowBlur = 0;
+
+    // Node border:
+    ctx.beginPath();
+    ctx.fillStyle = self.p.nodeBorderColor == 'node' ?
+                    (node['color'] || self.p.defaultNodeColor) :
+                    self.p.defaultNodeBorderColor;
+    ctx.arc(Math.round(node['displayX']),
+            Math.round(node['displayY']),
+            node['displaySize'] + self.p.borderSize,
+            0,
+            Math.PI * 2,
+            true);
+    ctx.closePath();
+    ctx.fill();
+
+    // Node:
+    ctx.beginPath();
+    ctx.fillStyle = self.p.nodeActiveColor == 'node' ?
+                    (node['color'] || self.p.defaultNodeColor) :
+                    self.p.defaultNodeActiveColor;
+    ctx.arc(Math.round(node['displayX']),
+            Math.round(node['displayY']),
+            node['displaySize'],
+            0,
+            Math.PI * 2,
+            true);
+
+    ctx.closePath();
+    ctx.fill();
+
+    // Label:
+    ctx.fillStyle = self.p.labelActiveColor == 'node' ?
+                    (node['color'] || self.p.defaultNodeColor) :
+                    self.p.defaultLabelActiveColor;
+    ctx.fillText(
+      node['label'],
+      Math.round(node['displayX'] + node['displaySize'] * 1.5),
+      Math.round(node['displayY'] + fontSize / 2 - 3)
+    );
+
+    return self;
+  };
+
+  /**
+   * Determines if a node is on the screen or not. The limits here are
+   * bigger than the actual screen, to avoid seeing labels disappear during
+   * the graph manipulation.
+   * @param  {Object}  node The node to check if it is on or out the screen.
+   * @return {boolean} Returns false if the node is hidden or not on the screen
+   *                   or true else.
+   */
+  function isOnScreen(node) {
+    if (isNaN(node['x']) || isNaN(node['y'])) {
+      throw (new Error('A node\'s coordinate is not a ' +
+                       'number (id: ' + node['id'] + ')')
+      );
+    }
+
+    return !node['hidden'] &&
+           (node['displayX'] + node['displaySize'] > -width / 3) &&
+           (node['displayX'] - node['displaySize'] < width * 4 / 3) &&
+           (node['displayY'] + node['displaySize'] > -height / 3) &&
+           (node['displayY'] - node['displaySize'] < height * 4 / 3);
+  };
+
+  /**
+   * Resizes this instance.
+   * @param  {number} w The new width.
+   * @param  {number} h The new height.
+   * @return {Plotter} Returns itself.
+   */
+  function resize(w, h) {
+    width = w;
+    height = h;
+
+    return self;
+  };
+
+  /**
+   * Helper function that tells us if a 'source'/'target' arrow setting
+   * applies, based on active edge/plotter settings.
+   * @param  {string}  arrowheadLocation  'source' or 'target'.
+   * @param  {string}  edgeArrowSetting   arrow setting ('none', 'source',
+   *                                      'target', 'both') on the edge itself,
+   *                                      if any.
+   * @return {boolean} Returns true if draw is required for the passed-in
+   *                   arrowheadLocation.
+   */
+  function isArrowDrawRequired(arrowheadLocation, edgeArrowSetting) {
+    return (
+      edgeArrowSetting == arrowheadLocation ||
+      edgeArrowSetting == 'both' ||
+      (
+        !edgeArrowSetting &&
+        (
+          self.p.defaultEdgeArrow == arrowheadLocation ||
+          self.p.defaultEdgeArrow == 'both'
+        )
+      )
+    );
+  };
+
+  /**
+   * Helper function that draws an arrowhead at a node's border based on the
+   * node's center coordinates and size, as well as a set of "control"
+   * coordinates. Future implementations could add a nodeShape parm to this
+   * function.
+   * For efficiency, nodeCoordinates parm is mutated according to calculated
+   * arrowhead tip coordinates.
+   * @param {CanvasRenderingContext2D} ctx  The context within which to draw
+   *                                        arrows.
+   * @param {Array} nodeCoordinates         [x,y] coordinate of center of node.
+   *    THIS FUNCTION ADJUSTS THE COORDINATES IN THIS ARRAY TO MATCH THE
+   *    INTERSECTION BETWEEN THE NODE BORDER AND THE LINE FROM THE CENTER OF
+   *    THE NODE TO THE CONTROL COORDINATES.
+   *    Parm mutation here favors performance but may be considered bad form
+   *    in the general case.
+   * @param {number} nodeSize               The size of the node. For circle
+   *                                        nodes (the only supported node
+   *                                        shape as of 2013-05-14), size is
+   *                                        radius.
+   * @param {number} ctrlX                  x-coordinate of the control point.
+   * @param {number} ctrlY                  y-coordinate of the control point.
+   * @param {number} size                   length of arrowhead.
+   * @return {Array} Returns the mutated (arrowhead) coordinates.
+   */
+  function applyArrow(ctx, nodeCoordinates, nodeSize, ctrlX, ctrlY, size) {
+    // Calculate and re-assign edge connection coordinates (at node border
+    // instead of node center):
+    var xDiff = nodeCoordinates[0] - ctrlX;
+    var yDiff = nodeCoordinates[1] - ctrlY;
+    var ratio = nodeSize / Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+
+    nodeCoordinates[0] = nodeCoordinates[0] - xDiff * ratio;
+    nodeCoordinates[1] = nodeCoordinates[1] - yDiff * ratio;
+
+    // Draw arrowhead:
+    ctx.lineWidth = 0;
+    ctx.fillStyle = ctx.strokeStyle;
+    sigma.tools.drawArrowhead(
+      ctx,
+      nodeCoordinates[0],
+      nodeCoordinates[1],
+      size,
+      sigma.tools.getIncidenceAngle(
+        ctrlX,
+        ctrlY,
+        nodeCoordinates[0],
+        nodeCoordinates[1]
+      )
+    );
+
+    return nodeCoordinates;
+  };
+
+  this.task_drawLabel = task_drawLabel;
+  this.task_drawEdge = task_drawEdge;
+  this.task_drawNode = task_drawNode;
+  this.drawActiveNode = drawActiveNode;
+  this.drawHoverNode = drawHoverNode;
+  this.isOnScreen = isOnScreen;
+  this.resize = resize;
 }
-
 /**
  * Sigma is the main class. It represents the core of any instance id sigma.js.
  * It is private and can be initialized only from inside sigma.js. To see its
@@ -2168,732 +2820,218 @@ function Sigma(root, id) {
   });
 }
 
-/**
- * The graph data model used in sigma.js.
- * @constructor
- * @extends sigma.classes.Cascade
- * @extends sigma.classes.EventDispatcher
- * @this {Graph}
- */
-function Graph() {
-  sigma.classes.Cascade.call(this);
+function SigmaPublic(sigmaInstance) {
+  var s = sigmaInstance;
+  var self = this;
   sigma.classes.EventDispatcher.call(this);
 
-  /**
-   * Represents "this", without the well-known scope issue.
-   * @private
-   * @type {Graph}
-   */
-  var self = this;
+  this._core = sigmaInstance;
 
-  /**
-   * The different parameters that determine how the nodes and edges should be
-   * translated and rescaled.
-   * @type {Object}
-   */
-  this.p = {
-    minNodeSize: 0,
-    maxNodeSize: 0,
-    minEdgeSize: 0,
-    maxEdgeSize: 0,
-    //   Scaling mode:
-    //   - 'inside' (default)
-    //   - 'outside'
-    scalingMode: 'inside',
-    nodesPowRatio: 0.5,
-    edgesPowRatio: 0
+  this.kill = function() {
+    // TODO
   };
 
-  /**
-   * Contains the borders of the graph. These are useful to avoid the user to
-   * drag the graph out of the canvas.
-   * @type {Object}
-   */
-  this.borders = {};
-
-  /**
-   * Inserts a node in the graph.
-   * @param {string} id     The node's ID.
-   * @param {object} params An object containing the different parameters
-   *                        of the node.
-   * @return {Graph} Returns itself.
-   */
-  function addNode(id, params) {
-    if (self.nodesIndex[id]) {
-      throw new Error('Node "' + id + '" already exists.');
-    }
-
-    params = params || {};
-    var n = {
-      // Numbers :
-      'x': 0,
-      'y': 0,
-      'size': 1,
-      'degree': 0,
-      'inDegree': 0,
-      'outDegree': 0,
-      // Flags :
-      'fixed': false,
-      'active': false,
-      'hidden': false,
-      'forceLabel': false,
-      // Strings :
-      'label': id.toString(),
-      'id': id.toString(),
-      // Custom attributes :
-      'attr': {}
-    };
-
-    for (var k in params) {
-      switch (k) {
-        case 'id':
-          break;
-        case 'x':
-        case 'y':
-        case 'size':
-          n[k] = +params[k];
-          break;
-        case 'fixed':
-        case 'active':
-        case 'hidden':
-        case 'forceLabel':
-          n[k] = !!params[k];
-          break;
-        case 'color':
-        case 'label':
-          n[k] = params[k];
-          break;
-        default:
-          n['attr'][k] = params[k];
-      }
-    }
-
-    self.nodes.push(n);
-    self.nodesIndex[id.toString()] = n;
-
-    return self;
+  this.getID = function() {
+    return s.id;
   };
 
-  /**
-   * Generates the clone of a node, to make it easier to be exported.
-   * @private
-   * @param  {Object} node The node to clone.
-   * @return {Object} The clone of the node.
-   */
-  function cloneNode(node) {
+  // Config:
+  this.configProperties = function(a1, a2) {
+    var res = s.config(a1, a2);
+    return res == s ? self : res;
+  };
+
+  this.drawingProperties = function(a1, a2) {
+    var res = s.plotter.config(a1, a2);
+    return res == s.plotter ? self : res;
+  };
+
+  this.mouseProperties = function(a1, a2) {
+    var res = s.mousecaptor.config(a1, a2);
+    return res == s.mousecaptor ? self : res;
+  };
+
+  this.graphProperties = function(a1, a2) {
+    var res = s.graph.config(a1, a2);
+    return res == s.graph ? self : res;
+  };
+
+  this.getMouse = function() {
     return {
-      'x': node['x'],
-      'y': node['y'],
-      'size': node['size'],
-      'degree': node['degree'],
-      'inDegree': node['inDegree'],
-      'outDegree': node['outDegree'],
-      'displayX': node['displayX'],
-      'displayY': node['displayY'],
-      'displaySize': node['displaySize'],
-      'label': node['label'],
-      'id': node['id'],
-      'color': node['color'],
-      'fixed': node['fixed'],
-      'active': node['active'],
-      'hidden': node['hidden'],
-      'forceLabel': node['forceLabel'],
-      'attr': node['attr']
+      mouseX: s.mousecaptor.mouseX,
+      mouseY: s.mousecaptor.mouseY,
+      down: s.mousecaptor.isMouseDown
     };
   };
 
-  /**
-   * Checks the clone of a node, and inserts its values when possible. For
-   * example, it is possible to modify the size or the color of a node, but it
-   * is not possible to modify its display values or its id.
-   * @private
-   * @param  {Object} node The original node.
-   * @param  {Object} copy The clone.
-   * @return {Graph} Returns itself.
-   */
-  function checkNode(node, copy) {
-    for (var k in copy) {
-      switch (k) {
-        case 'id':
-        case 'attr':
-        case 'degree':
-        case 'inDegree':
-        case 'outDegree':
-        case 'displayX':
-        case 'displayY':
-        case 'displaySize':
-          break;
-        case 'x':
-        case 'y':
-        case 'size':
-          node[k] = +copy[k];
-          break;
-        case 'fixed':
-        case 'active':
-        case 'hidden':
-        case 'forceLabel':
-          node[k] = !!copy[k];
-          break;
-        case 'color':
-        case 'label':
-          node[k] = (copy[k] || '').toString();
-          break;
-        default:
-          node['attr'][k] = copy[k];
-      }
-    }
-
-    return self;
-  };
-
-  /**
-   * Deletes one or several nodes from the graph, and the related edges.
-   * @param  {(string|Array.<string>)} v A string ID, or an Array of several
-   *                                     IDs.
-   * @return {Graph} Returns itself.
-   */
-  function dropNode(v) {
-    var a = (v instanceof Array ? v : [v]) || [];
-
-    a.forEach(function(id) {
-      if (self.nodesIndex[id]) {
-        var index = null;
-        self.nodes.some(function(n, i) {
-          if (n['id'] == id) {
-            index = i;
-            return true;
-          }
-          return false;
-        });
-
-        index != null && self.nodes.splice(index, 1);
-        delete self.nodesIndex[id];
-
-        var edgesToRemove = [];
-        self.edges = self.edges.filter(function(e) {
-          if (e['source']['id'] == id) {
-            delete self.edgesIndex[e['id']];
-            e['target']['degree']--;
-            e['target']['inDegree']--;
-            return false;
-          }else if (e['target']['id'] == id) {
-            delete self.edgesIndex[e['id']];
-            e['source']['degree']--;
-            e['source']['outDegree']--;
-            return false;
-          }
-          return true;
-        });
-      }else {
-        sigma.log('Node "' + id + '" does not exist.');
-      }
-    });
-
-    return self;
-  };
-
-  /**
-   * Inserts an edge in the graph.
-   * @param {string} id     The edge ID.
-   * @param {string} source The ID of the edge source.
-   * @param {string} target The ID of the edge target.
-   * @param {object} params An object containing the different parameters
-   *                        of the edge.
-   * @return {Graph} Returns itself.
-   */
-  function addEdge(id, source, target, params) {
-    if (self.edgesIndex[id]) {
-      throw new Error('Edge "' + id + '" already exists.');
-    }
-
-    if (!self.nodesIndex[source]) {
-      var s = 'Edge\'s source "' + source + '" does not exist yet.';
-      throw new Error(s);
-    }
-
-    if (!self.nodesIndex[target]) {
-      var s = 'Edge\'s target "' + target + '" does not exist yet.';
-      throw new Error(s);
-    }
-
-    params = params || {};
-    var e = {
-      'source': self.nodesIndex[source],
-      'target': self.nodesIndex[target],
-      'size': 1,
-      'weight': 1,
-      'displaySize': 0.5,
-      'label': id.toString(),
-      'id': id.toString(),
-      'hidden': false,
-      'attr': {}
-    };
-
-    e['source']['degree']++;
-    e['source']['outDegree']++;
-    e['target']['degree']++;
-    e['target']['inDegree']++;
-
-    for (var k in params) {
-      switch (k) {
-        case 'id':
-        case 'source':
-        case 'target':
-          break;
-        case 'hidden':
-          e[k] = !!params[k];
-          break;
-        case 'size':
-        case 'weight':
-          e[k] = +params[k];
-          break;
-        case 'color':
-          e[k] = params[k].toString();
-          break;
-        case 'type':
-          e[k] = params[k].toString();
-          break;
-        case 'label':
-          e[k] = params[k];
-          break;
-        default:
-          e['attr'][k] = params[k];
-      }
-    }
-
-    self.edges.push(e);
-    self.edgesIndex[id.toString()] = e;
-
-    return self;
-  };
-
-  /**
-   * Generates the clone of a edge, to make it easier to be exported.
-   * @private
-   * @param  {Object} edge The edge to clone.
-   * @return {Object} The clone of the edge.
-   */
-  function cloneEdge(edge) {
-    return {
-      'source': edge['source']['id'],
-      'target': edge['target']['id'],
-      'size': edge['size'],
-      'type': edge['type'],
-      'weight': edge['weight'],
-      'displaySize': edge['displaySize'],
-      'label': edge['label'],
-      'hidden': edge['hidden'],
-      'id': edge['id'],
-      'attr': edge['attr'],
-      'color': edge['color']
-    };
-  };
-
-  /**
-   * Checks the clone of an edge, and inserts its values when possible. For
-   * example, it is possible to modify the label or the type of an edge, but it
-   * is not possible to modify its display values or its id.
-   * @private
-   * @param  {Object} edge The original edge.
-   * @param  {Object} copy The clone.
-   * @return {Graph} Returns itself.
-   */
-  function checkEdge(edge, copy) {
-    for (var k in copy) {
-      switch (k) {
-        case 'id':
-        case 'displaySize':
-          break;
-        case 'weight':
-        case 'size':
-          edge[k] = +copy[k];
-          break;
-        case 'source':
-        case 'target':
-          edge[k] = self.nodesIndex[k] || edge[k];
-          break;
-        case 'hidden':
-          edge[k] = !!copy[k];
-          break;
-        case 'color':
-        case 'label':
-        case 'type':
-          edge[k] = (copy[k] || '').toString();
-          break;
-        default:
-          edge['attr'][k] = copy[k];
-      }
-    }
-
-    return self;
-  };
-
-  /**
-   * Deletes one or several edges from the graph.
-   * @param  {(string|Array.<string>)} v A string ID, or an Array of several
-   *                                     IDs.
-   * @return {Graph} Returns itself.
-   */
-  function dropEdge(v) {
-    var a = (v instanceof Array ? v : [v]) || [];
-
-    a.forEach(function(id) {
-      if (self.edgesIndex[id]) {
-        self.edgesIndex[id]['source']['degree']--;
-        self.edgesIndex[id]['source']['outDegree']--;
-        self.edgesIndex[id]['target']['degree']--;
-        self.edgesIndex[id]['target']['inDegree']--;
-
-        var index = null;
-        self.edges.some(function(n, i) {
-          if (n['id'] == id) {
-            index = i;
-            return true;
-          }
-          return false;
-        });
-
-        index != null && self.edges.splice(index, 1);
-        delete self.edgesIndex[id];
-      }else {
-        sigma.log('Edge "' + id + '" does not exist.');
-      }
-    });
-
-    return self;
-  };
-
-  /**
-   * Deletes every nodes and edges from the graph.
-   * @return {Graph} Returns itself.
-   */
-  function empty() {
-    self.nodes = [];
-    self.nodesIndex = {};
-    self.edges = [];
-    self.edgesIndex = {};
-
-    return self;
-  };
-
-  /**
-   * Computes the display x, y and size of each node, relatively to the
-   * original values and the borders determined in the parameters, such as
-   * each node is in the described area.
-   * @param  {number} w           The area width (actually the width of the DOM
-   *                              root).
-   * @param  {number} h           The area height (actually the height of the
-   *                              DOM root).
-   * @param  {boolean} parseNodes Indicates if the nodes have to be parsed.
-   * @param  {boolean} parseEdges Indicates if the edges have to be parsed.
-   * @return {Graph} Returns itself.
-   */
-  function rescale(w, h, parseNodes, parseEdges) {
-    var weightMax = 0, sizeMax = 0;
-
-    parseNodes && self.nodes.forEach(function(node) {
-      sizeMax = Math.max(node['size'], sizeMax);
-    });
-
-    parseEdges && self.edges.forEach(function(edge) {
-      weightMax = Math.max(edge['size'], weightMax);
-    });
-
-    sizeMax = sizeMax || 1;
-    weightMax = weightMax || 1;
-
-    // Recenter the nodes:
-    var xMin, xMax, yMin, yMax;
-    parseNodes && self.nodes.forEach(function(node) {
-      xMax = Math.max(node['x'], xMax || node['x']);
-      xMin = Math.min(node['x'], xMin || node['x']);
-      yMax = Math.max(node['y'], yMax || node['y']);
-      yMin = Math.min(node['y'], yMin || node['y']);
-    });
-
-    // First, we compute the scaling ratio, without considering the sizes
-    // of the nodes : Each node will have its center in the canvas, but might
-    // be partially out of it.
-    var scale = self.p.scalingMode == 'outside' ?
-                Math.max(w / Math.max(xMax - xMin, 1),
-                         h / Math.max(yMax - yMin, 1)) :
-                Math.min(w / Math.max(xMax - xMin, 1),
-                         h / Math.max(yMax - yMin, 1));
-
-    // Then, we correct that scaling ratio considering a margin, which is
-    // basically the size of the biggest node.
-    // This has to be done as a correction since to compare the size of the
-    // biggest node to the X and Y values, we have to first get an
-    // approximation of the scaling ratio.
-    var margin = (self.p.maxNodeSize || sizeMax) / scale;
-    xMax += margin;
-    xMin -= margin;
-    yMax += margin;
-    yMin -= margin;
-
-    scale = self.p.scalingMode == 'outside' ?
-            Math.max(w / Math.max(xMax - xMin, 1),
-                     h / Math.max(yMax - yMin, 1)) :
-            Math.min(w / Math.max(xMax - xMin, 1),
-                     h / Math.max(yMax - yMin, 1));
-
-    // Size homothetic parameters:
-    var a, b;
-    if (!self.p.maxNodeSize && !self.p.minNodeSize) {
-      a = 1;
-      b = 0;
-    }else if (self.p.maxNodeSize == self.p.minNodeSize) {
-      a = 0;
-      b = self.p.maxNodeSize;
+  // Actions:
+  this.position = function(stageX, stageY, ratio) {
+    if (arguments.length == 0) {
+      return {
+        stageX: s.mousecaptor.stageX,
+        stageY: s.mousecaptor.stageY,
+        ratio: s.mousecaptor.ratio
+      };
     }else {
-      a = (self.p.maxNodeSize - self.p.minNodeSize) / sizeMax;
-      b = self.p.minNodeSize;
-    }
+      s.mousecaptor.stageX = stageX != undefined ?
+        stageX :
+        s.mousecaptor.stageX;
+      s.mousecaptor.stageY = stageY != undefined ?
+        stageY :
+        s.mousecaptor.stageY;
+      s.mousecaptor.ratio = ratio != undefined ?
+        ratio :
+        s.mousecaptor.ratio;
 
-    var c, d;
-    if (!self.p.maxEdgeSize && !self.p.minEdgeSize) {
-      c = 1;
-      d = 0;
-    }else if (self.p.maxEdgeSize == self.p.minEdgeSize) {
-      c = 0;
-      d = self.p.minEdgeSize;
+      return self;
+    }
+  };
+
+  this.goTo = function(stageX, stageY, ratio) {
+    s.mousecaptor.interpolate(stageX, stageY, ratio);
+    return self;
+  };
+
+  this.zoomTo = function(x, y, ratio) {
+    ratio = Math.min(
+              Math.max(s.mousecaptor.config('minRatio'), ratio),
+              s.mousecaptor.config('maxRatio')
+            );
+    if (ratio == s.mousecaptor.ratio) {
+      s.mousecaptor.interpolate(
+        x - s.width / 2 + s.mousecaptor.stageX,
+        y - s.height / 2 + s.mousecaptor.stageY
+      );
     }else {
-      c = (self.p.maxEdgeSize - self.p.minEdgeSize) / weightMax;
-      d = self.p.minEdgeSize;
+      s.mousecaptor.interpolate(
+        (ratio * x - s.mousecaptor.ratio * s.width/2) /
+        (ratio - s.mousecaptor.ratio),
+        (ratio * y - s.mousecaptor.ratio * s.height/2) /
+        (ratio - s.mousecaptor.ratio),
+        ratio
+      );
     }
-
-    // Rescale the nodes:
-    parseNodes && self.nodes.forEach(function(node) {
-      node['displaySize'] = node['size'] * a + b;
-
-      if (!node['fixed']) {
-        node['displayX'] = (node['x'] - (xMax + xMin) / 2) * scale + w / 2;
-        node['displayY'] = (node['y'] - (yMax + yMin) / 2) * scale + h / 2;
-      }
-    });
-
-    parseEdges && self.edges.forEach(function(edge) {
-      edge['displaySize'] = edge['size'] * c + d;
-    });
-
     return self;
   };
 
-  /**
-   * Translates the display values of the nodes and edges relatively to the
-   * scene position and zoom ratio.
-   * @param  {number} sceneX      The x position of the scene.
-   * @param  {number} sceneY      The y position of the scene.
-   * @param  {number} ratio       The zoom ratio of the scene.
-   * @param  {boolean} parseNodes Indicates if the nodes have to be parsed.
-   * @param  {boolean} parseEdges Indicates if the edges have to be parsed.
-   * @return {Graph} Returns itself.
-   */
-  function translate(sceneX, sceneY, ratio, parseNodes, parseEdges) {
-    var sizeRatio = Math.pow(ratio, self.p.nodesPowRatio);
-    parseNodes && self.nodes.forEach(function(node) {
-      if (!node['fixed']) {
-        node['displayX'] = node['displayX'] * ratio + sceneX;
-        node['displayY'] = node['displayY'] * ratio + sceneY;
-      }
-
-      node['displaySize'] = node['displaySize'] * sizeRatio;
-    });
-
-    sizeRatio = Math.pow(ratio, self.p.edgesPowRatio);
-    parseEdges && self.edges.forEach(function(edge) {
-      edge['displaySize'] = edge['displaySize'] * sizeRatio;
-    });
-
+  this.resize = function(w, h) {
+    s.resize(w, h);
     return self;
   };
 
-  /**
-   * Determines the borders of the graph as it will be drawn. It is used to
-   * avoid the user to drag the graph out of the canvas.
-   */
-  function setBorders() {
-    self.borders = {};
+  this.draw = function(nodes, edges, labels, safe) {
+    s.draw(nodes, edges, labels, safe);
+    return self;
+  };
 
-    self.nodes.forEach(function(node) {
-      self.borders.minX = Math.min(
-        self.borders.minX == undefined ?
-          node['displayX'] - node['displaySize'] :
-          self.borders.minX,
-        node['displayX'] - node['displaySize']
-      );
+  this.refresh = function() {
+    s.refresh();
+    return self;
+  };
 
-      self.borders.maxX = Math.max(
-        self.borders.maxX == undefined ?
-          node['displayX'] + node['displaySize'] :
-          self.borders.maxX,
-        node['displayX'] + node['displaySize']
-      );
+  // Tasks methods:
+  this.addGenerator = function(id, task, condition) {
+    sigma.chronos.addGenerator(id + '_ext_' + s.id, task, condition);
+    return self;
+  };
 
-      self.borders.minY = Math.min(
-        self.borders.minY == undefined ?
-          node['displayY'] - node['displaySize'] :
-          self.borders.minY,
-        node['displayY'] - node['displaySize']
-      );
+  this.removeGenerator = function(id) {
+    sigma.chronos.removeGenerator(id + '_ext_' + s.id);
+    return self;
+  };
 
-      self.borders.maxY = Math.max(
-        self.borders.maxY == undefined ?
-          node['displayY'] - node['displaySize'] :
-          self.borders.maxY,
-        node['displayY'] - node['displaySize']
-      );
-    });
+  // Graph methods:
+  this.addNode = function(id, params) {
+    s.graph.addNode(id, params);
+    return self;
+  };
+
+  this.addEdge = function(id, source, target, params) {
+    s.graph.addEdge(id, source, target, params);
+    return self;
   }
 
-  /**
-   * Checks which nodes are under the (mX, mY) points, representing the mouse
-   * position.
-   * @param  {number} mX The mouse X position.
-   * @param  {number} mY The mouse Y position.
-   * @return {Graph} Returns itself.
-   */
-  function checkHover(mX, mY) {
-    var dX, dY, s, over = [], out = [];
-    self.nodes.forEach(function(node) {
-      if (node['hidden']) {
-        node['hover'] = false;
-        return;
-      }
-
-      dX = Math.abs(node['displayX'] - mX);
-      dY = Math.abs(node['displayY'] - mY);
-      s = node['displaySize'];
-
-      var oldH = node['hover'];
-      var newH = dX < s && dY < s && Math.sqrt(dX * dX + dY * dY) < s;
-
-      if (oldH && !newH) {
-        node['hover'] = false;
-        out.push(node.id);
-      } else if (newH && !oldH) {
-        node['hover'] = true;
-        over.push(node.id);
-      }
-    });
-
-    over.length && self.dispatch('overnodes', over);
-    out.length && self.dispatch('outnodes', out);
-
+  this.dropNode = function(v) {
+    s.graph.dropNode(v);
     return self;
   };
 
-  /**
-   * Applies a function to a clone of each node (or indicated nodes), and then
-   * tries to apply the modifications made on the clones to the original nodes.
-   * @param  {function(Object)} fun The function to execute.
-   * @param  {?Array.<string>} ids  An Array of node IDs (optional).
-   * @return {Graph} Returns itself.
-   */
-  function iterNodes(fun, ids) {
-    var a = ids ? ids.map(function(id) {
-      return self.nodesIndex[id];
-    }) : self.nodes;
+  this.dropEdge = function(v) {
+    s.graph.dropEdge(v);
+    return self;
+  };
 
-    var aCopies = a.map(cloneNode);
-    aCopies.forEach(fun);
+  this.pushGraph = function(object, safe) {
+    object.nodes && object.nodes.forEach(function(node) {
+      node['id'] && (!safe || !s.graph.nodesIndex[node['id']]) &&
+                    self.addNode(node['id'], node);
+    });
 
-    a.forEach(function(n, i) {
-      checkNode(n, aCopies[i]);
+    var isEdgeValid;
+    object.edges && object.edges.forEach(function(edge) {
+      validID = edge['source'] && edge['target'] && edge['id'];
+      validID &&
+        (!safe || !s.graph.edgesIndex[edge['id']]) &&
+        self.addEdge(
+          edge['id'],
+          edge['source'],
+          edge['target'],
+          edge
+        );
     });
 
     return self;
   };
 
-  /**
-   * Applies a function to a clone of each edge (or indicated edges), and then
-   * tries to apply the modifications made on the clones to the original edges.
-   * @param  {function(Object)} fun The function to execute.
-   * @param  {?Array.<string>} ids  An Array of edge IDs (optional).
-   * @return {Graph} Returns itself.
-   */
-  function iterEdges(fun, ids) {
-    var a = ids ? ids.map(function(id) {
-      return self.edgesIndex[id];
-    }) : self.edges;
-
-    var aCopies = a.map(cloneEdge);
-    aCopies.forEach(fun);
-
-    a.forEach(function(e, i) {
-      checkEdge(e, aCopies[i]);
-    });
-
+  this.emptyGraph = function() {
+    s.graph.empty();
     return self;
   };
 
-  /**
-   * Returns a specific node clone or an array of specified node clones.
-   * @param  {(string|Array.<string>)} ids The ID or an array of node IDs.
-   * @return {(Object|Array.<Object>)} The clone or the array of clones.
-   */
-  function getNodes(ids) {
-    var a = ((ids instanceof Array ? ids : [ids]) || []).map(function(id) {
-      return cloneNode(self.nodesIndex[id]);
-    });
-
-    return (ids instanceof Array ? a : a[0]);
+  this.getNodesCount = function() {
+    return s.graph.nodes.length;
   };
 
-  /**
-   * Returns a specific edge clone or an array of specified edge clones.
-   * @param  {(string|Array.<string>)} ids The ID or an array of edge IDs.
-   * @return {(Object|Array.<Object>)} The clone or the array of clones.
-   */
-  function getEdges(ids) {
-    var a = ((ids instanceof Array ? ids : [ids]) || []).map(function(id) {
-      return cloneEdge(self.edgesIndex[id]);
-    });
-
-    return (ids instanceof Array ? a : a[0]);
+  this.getEdgesCount = function() {
+    return s.graph.edges.length;
   };
 
-  empty();
+  this.iterNodes = function(fun, ids) {
+    s.graph.iterNodes(fun, ids);
+    return self;
+  };
 
-  this.addNode = addNode;
-  this.addEdge = addEdge;
-  this.dropNode = dropNode;
-  this.dropEdge = dropEdge;
+  this.iterEdges = function(fun, ids) {
+    s.graph.iterEdges(fun, ids);
+    return self;
+  };
 
-  this.iterEdges = iterEdges;
-  this.iterNodes = iterNodes;
+  this.getNodes = function(ids) {
+    return s.graph.getNodes(ids);
+  };
 
-  this.getEdges = getEdges;
-  this.getNodes = getNodes;
+  this.getEdges = function(ids) {
+    return s.graph.getEdges(ids);
+  };
 
-  this.empty = empty;
-  this.rescale = rescale;
-  this.translate = translate;
-  this.setBorders = setBorders;
-  this.checkHover = checkHover;
+  // Monitoring
+  this.activateMonitoring = function() {
+    return s.monitor.activate();
+  };
+
+  this.desactivateMonitoring = function() {
+    return s.monitor.desactivate();
+  };
+
+  // Events
+  s.bind('downnodes upnodes downgraph upgraph', function(e) {
+    self.dispatch(e.type, e.content);
+  });
+
+  s.graph.bind('overnodes outnodes', function(e) {
+    self.dispatch(e.type, e.content);
+  });
 }
-
-sigma.easing = {
-  linear: {},
-  quadratic: {}
-};
-
-sigma.easing.linear.easenone = function(k) {
-  return k;
-};
-
-sigma.easing.quadratic.easein = function(k) {
-  return k * k;
-};
-
-sigma.easing.quadratic.easeout = function(k) {
-  return - k * (k - 2);
-};
-
-sigma.easing.quadratic.easeinout = function(k) {
-  if ((k *= 2) < 1) return 0.5 * k * k;
-  return - 0.5 * (--k * (k - 2) - 1);
-};
 
 /**
  * Add a function to the prototype of SigmaPublic, but with access to the
@@ -3443,6 +3581,28 @@ sigma.log = function() {
   return sigma;
 };
 
+sigma.easing = {
+  linear: {},
+  quadratic: {}
+};
+
+sigma.easing.linear.easenone = function(k) {
+  return k;
+};
+
+sigma.easing.quadratic.easein = function(k) {
+  return k * k;
+};
+
+sigma.easing.quadratic.easeout = function(k) {
+  return - k * (k - 2);
+};
+
+sigma.easing.quadratic.easeinout = function(k) {
+  if ((k *= 2) < 1) return 0.5 * k * k;
+  return - 0.5 * (--k * (k - 2) - 1);
+};
+
 sigma.tools.drawRoundRect = function(ctx, x, y, w, h, ellipse, corners) {
   var e = ellipse ? ellipse : 0;
   var c = corners ? corners : [];
@@ -3491,6 +3651,40 @@ sigma.tools.drawRoundRect = function(ctx, x, y, w, h, ellipse, corners) {
   }
 
   ctx.lineTo(x, y + e);
+};
+
+/**
+ * Draws a filled arrowhead shape to the corresponding canvas.
+ * @param  {CanvasRenderingContext2D} ctx  The context within which to draw the
+ *                                         arrowhead.
+ * @param  {number} x0                     The x-coordinate of the tip of the
+ *                                         arrowhead.
+ * @param  {number} y0                     The y-coordinate of the tip of the
+ *                                         arrowhead.
+ * @param  {number} size                   The length of the arrowhead.
+ * @param  {number} rotationAngle          The angle of rotation of the
+ *                                         arrowhead, in degrees.
+ * @return {undefined}
+ */
+sigma.tools.drawArrowhead = function(ctx, x0, y0, size, rotationAngle) {
+  // Angle between one side of arrowhead and shaft:
+  var ARROW_SHARPNESS = 22;
+
+  ctx.beginPath();
+
+  ctx.moveTo(x0, y0);
+
+  // (Math.PI / 180) === 0.017453292519943295
+  var coef = 0.017453292519943295;
+  var x1 = x0 + Math.cos(coef * (ARROW_SHARPNESS + rotationAngle)) * size;
+  var y1 = y0 + Math.sin(coef * (ARROW_SHARPNESS + rotationAngle)) * size;
+  var x2 = x0 + Math.cos(coef * (rotationAngle - ARROW_SHARPNESS)) * size;
+  var y2 = y0 + Math.sin(coef * (rotationAngle - ARROW_SHARPNESS)) * size;
+
+  ctx.lineTo(x1, y1);
+  ctx.quadraticCurveTo((x0 + x1 + x2) / 3, (y0 + y1 + y2) / 3, x2, y2);
+  ctx.lineTo(x0, y0);
+  ctx.fill();
 };
 
 sigma.tools.getRGB = function(s, asArray) {
@@ -3546,6 +3740,27 @@ sigma.tools.toHex = function(n) {
          '0123456789ABCDEF'.charAt(n % 16);
 };
 
+/**
+ * Provides the angle of incidence of the end point of a line or quadratic
+ * curve, in degrees.
+ * @param  {number} x1  The x-coordinate of the start point of the line or
+ *                      control point of the quadratic curve.
+ * @param  {number} y1  The y-coordinate of the start point of the line or
+ *                      control point of the quadratic curve.
+ * @param  {number} x2  The x-coordinate of the line or quadratic curve end
+ *                      point.
+ * @param  {number} y2  The y-coordinate of the line or quadratic curve end
+ *                      point.
+ * @return {number}     Returns the angle of incidence of the end point of the
+ *                      line or quadratic curve cooresponding to the coordinate
+ *                      parms, in degrees.
+ */
+sigma.tools.getIncidenceAngle = function(x1, y1, x2, y2) {
+    return (
+      (x1 <= x2 ? 180 : 0) +
+      Math.atan(((y2 - y1) / (x2 - x1))) * 180 / Math.PI
+    );
+};
 sigma.publicPrototype = SigmaPublic.prototype;
 })();
 
