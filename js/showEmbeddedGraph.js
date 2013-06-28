@@ -1,6 +1,6 @@
 var getGraph;
 
-$(document).ready( function() {
+$(document).ready(function() {
     // Set the graph height first
     var controls = $('#controls');
     var footer = $('#footnote-license');
@@ -177,4 +177,5 @@ $(document).ready( function() {
     getGraph = function() {
         return sigInst;
     }
-})
+});
+

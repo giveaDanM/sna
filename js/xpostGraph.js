@@ -162,5 +162,5 @@ $(document).ready(function() {
 
     // Draw the graph:
     sigInst.draw();
-}
+});
 

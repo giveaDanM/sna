@@ -169,5 +169,5 @@ $(document).ready(function() {
     getGraph = function() {
         return sigInst;
     }
-}
+});
 
