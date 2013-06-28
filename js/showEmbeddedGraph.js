@@ -176,6 +176,6 @@ $(document).ready(function() {
     // Add getter for dev work
     getGraph = function() {
         return sigInst;
-    }
+    };
 });
 
