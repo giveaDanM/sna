@@ -40,7 +40,7 @@ a {
 }
 
 #controls {
-    float: initial;
+    display: inline-block;
 }
 
 #controls>*,
