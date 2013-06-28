@@ -1,6 +1,6 @@
 var getGraph;
 
-$(document).ready(function {
+$(document).ready(function() {
     if (navigator.appName == "Microsoft Internet Explorer") {
         $('#graph').css({color:"white", textAlign:"center", verticalAlign:"middle"}).html("Sorry, but this feature is not supported by Internet Explorer. Please try a different web browser.");
         return;
