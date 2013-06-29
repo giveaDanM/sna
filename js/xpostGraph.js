@@ -169,8 +169,8 @@ $(document).ready(function() {
     // Also no initial zoom option. Let's calculate the position manually
 
     var centre = {
-        'x': container.width() / 2,
-        'y': container.height() / 2
+        x: container.width() / 2,
+        y: container.height() / 2
     };
 
     // Draw the graph:
