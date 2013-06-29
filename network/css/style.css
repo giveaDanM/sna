@@ -172,6 +172,10 @@ font-weight: bold;
 font-size:14px;
 }
 
+.mainlogo {
+    height: 80px;
+}
+
 .left-close {
 background-image: url('../images/fancybox_sprite.png');
 margin-left:-37px;
