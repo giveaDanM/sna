@@ -13,8 +13,8 @@ $(document).ready(function() {
         labelThreshold: 6,
         defaultEdgeType: 'none'
     }).graphProperties({
-        minNodeSize: 5,
-        maxNodeSize: 200,
+        minNodeSize: 0.1,
+        maxNodeSize: 5,
         minEdgeSize: 1,
         maxEdgeSize: 15
     }).mouseProperties({
