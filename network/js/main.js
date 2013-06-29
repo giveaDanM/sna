@@ -204,6 +204,11 @@ function setupGUI(config) {
 function configSigmaElements(config) {
 	$GP=config.GP;
     
+    // Hide all edges by default
+    sigInst.iterEdges(function(e){
+        e.hidden = 1;
+    });
+
     // Node hover behaviour
     if (config.features.hoverBehavior == "dim") {
 
@@ -217,10 +222,12 @@ function configSigmaElements(config) {
 				e.attr['true_color'] = e.color;
 				e.color = greyColor;
 				e.attr['grey'] = 1;
+                e.hidden = 1;
 			}
 		}else{
 			e.color = e.attr['grey'] ? e.attr['true_color'] : e.color;
 			e.attr['grey'] = 0;
+            e.hidden = 0;
 
 			neighbors[e.source] = 1;
 			neighbors[e.target] = 1;
@@ -241,6 +248,7 @@ function configSigmaElements(config) {
 		sigInst.iterEdges(function(e){
 			e.color = e.attr['grey'] ? e.attr['true_color'] : e.color;
 			e.attr['grey'] = 0;
+            e.hidden = 1;
 		}).iterNodes(function(n){
 			n.color = n.attr['grey'] ? n.attr['true_color'] : n.color;
 			n.attr['grey'] = 0;
@@ -266,7 +274,7 @@ function configSigmaElements(config) {
 		}).draw(2,2,2);
 		}).bind('outnodes',function(){
 		sigInst.iterEdges(function(e){
-		  	e.hidden = 0;
+		  	e.hidden = 1;
 		}).iterNodes(function(n){
 		  	n.hidden = 0;
 		}).draw(2,2,2);
