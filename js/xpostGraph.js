@@ -166,7 +166,7 @@ $(document).ready(function() {
         e.hidden = 1;
     });
 
-    // Also no initial zoom option. Let's calculate the position manually
+    // Also no initial zoom option. Let's calculate the start position manually
 
     var centre = {
         x: container.width() / 2,
