@@ -6,7 +6,7 @@ $(document).ready(function() {
 
     // Instanciate sigma.js and customize rendering :
     var container = $('#graph');
-    var sigInst = sigma.init(container.get()).drawingProperties({
+    var sigInst = sigma.init(container[0]).drawingProperties({
         defaultLabelColor: '#fff',
         defaultLabelSize: 14,
         defaultLabelBGColor: '#fff',
