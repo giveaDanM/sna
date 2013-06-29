@@ -433,7 +433,7 @@ function showGroups(a) {
 function nodeNormal() {
     !0 != $GP.calculating && !1 != sigInst.detail && (showGroups(!1), $GP.calculating = !0, sigInst.detail = !0, $GP.info.delay(400).animate({width:'hide'},350),$GP.cluster.hide(), sigInst.iterEdges(function (a) {
         a.attr.color = !1;
-        a.hidden = !1
+        a.hidden = 1
     }), sigInst.iterNodes(function (a) {
         a.hidden = !1;
         a.attr.color = !1;
