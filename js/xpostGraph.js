@@ -160,6 +160,11 @@ $(document).ready(function() {
         }, 1);
     });
 
+    // Sigma.js doesn't yet support hidden edges on initialisation, so let's do it manually
+    sigInst.iterEdges(function(e) {
+        e.hidden = 1;
+    });
+
     // Draw the graph:
     sigInst.draw();
 });
