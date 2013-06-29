@@ -12,7 +12,7 @@ $(document).ready(function() {
         defaultLabelBGColor: '#fff',
         defaultLabelHoverColor: '#000',
         labelThreshold: 6,
-        defaultEdgeType: 'none'
+        defaultEdgeType: 'curve'
     }).graphProperties({
         minNodeSize: 0.5,
         maxNodeSize: 20,
@@ -62,6 +62,7 @@ $(document).ready(function() {
             if(nodes.indexOf(e.source) >= 0 || nodes.indexOf(e.target) >= 0) {
                 neighbors[e.source] = 1;
                 neighbors[e.target] = 1;
+                e.hidden = 0;
             }
         }).iterNodes(function(n) {
             if(neighbors[n.id]) {
@@ -73,6 +74,8 @@ $(document).ready(function() {
     var unhighlightConnected = function() {
         sigInst.iterNodes(function(n) {
             n.active = false;
+        }).iterEdges(function(e) {
+            e.hidden = 1;
         }).draw(2,2,2);
     };
 
