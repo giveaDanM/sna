@@ -171,7 +171,7 @@ $(document).ready(function() {
     var centre = {
         'x': container.width() / 2,
         'y': container.height() / 2
-    }
+    };
 
     // Draw the graph:
     sigInst.draw(centre.x, centre.y, 8);
