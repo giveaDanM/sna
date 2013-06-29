@@ -85,23 +85,6 @@ $(document).ready(function() {
     });
 
     sigInst.bind('overnodes', highlightConnected).bind('outnodes', unhighlightConnected);
-    $(document.getElementById('toggle-hiding')).data('toggle', false);
-
-    document.getElementById('toggle-hiding').addEventListener('click', function(event) {
-        var button = $(event.target)
-        var toggle = button.data('toggle');
-        if (toggle) {
-            sigInst.unbind('overnodes',hideUnconnected).unbind('outnodes',showUnconnected);
-            sigInst.bind('overnodes',highlightConnected).bind('outnodes',unhighlightConnected);
-            button.html("Hide unconnected networks");
-        }
-        else {
-            sigInst.unbind('overnodes',highlightConnected).unbind('outnodes',unhighlightConnected);
-            sigInst.bind('overnodes',hideUnconnected).bind('outnodes',showUnconnected);
-            button.html("Always show all networks");
-        }
-        $(event.target).data('toggle', !toggle);
-    },true);
 
     document.getElementById('reset-graph').addEventListener('click', function() {
         sigInst.position(0,0,1).draw();
