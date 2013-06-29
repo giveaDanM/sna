@@ -5,7 +5,8 @@ $(document).ready(function() {
     }
 
     // Instanciate sigma.js and customize rendering :
-    var sigInst = sigma.init(document.getElementById('graph')).drawingProperties({
+    var container = $('#graph');
+    var sigInst = sigma.init(container.get()).drawingProperties({
         defaultLabelColor: '#fff',
         defaultLabelSize: 14,
         defaultLabelBGColor: '#fff',
@@ -13,8 +14,8 @@ $(document).ready(function() {
         labelThreshold: 6,
         defaultEdgeType: 'none'
     }).graphProperties({
-        minNodeSize: 0.1,
-        maxNodeSize: 5,
+        minNodeSize: 0.5,
+        maxNodeSize: 20,
         minEdgeSize: 1,
         maxEdgeSize: 15
     }).mouseProperties({
@@ -165,7 +166,14 @@ $(document).ready(function() {
         e.hidden = 1;
     });
 
+    // Also no initial zoom option. Let's calculate the position manually
+
+    var centre = {
+        'x': container.width() / 2,
+        'y': container.height() / 2
+    }
+
     // Draw the graph:
-    sigInst.draw();
+    sigInst.draw(centre.x, centre.y, 8);
 });
 
