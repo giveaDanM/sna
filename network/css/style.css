@@ -85,6 +85,7 @@ canvas#sigma_bg_1 {
 	font-weight:bold;
 }
 
+.default-subreddit-logo,
 #subreddit-logo {
     height: 40px;
 }
