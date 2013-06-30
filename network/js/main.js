@@ -343,6 +343,13 @@ function Search(a) {
     this.lastSearch = "";
     this.searching = !1;
     var b = this;
+    var nodeCompare = function(a, b) {
+        if (a.label < b.label)
+            return -1;
+        if (a.label > b.label)
+            return 1;
+        return 0;
+    };
     this.input.focus(function () {
         var a = $(this);
         a.data("focus") || (a.data("focus", !0), a.removeClass("empty"));
@@ -377,6 +384,7 @@ function Search(a) {
         this.searching = !0;
         this.lastSearch = a;
         this.results.empty();
+        var lastSearchTerm = a;
         if (2 >= a.length) this.results.html("<i>You must search for a name with a minimum of 3 letters.</i>");
         else {
             var exactMatchIndex = -1;
@@ -385,7 +393,7 @@ function Search(a) {
                     id: a.id,
                     name: a.label
                 });
-                if (a.label.toLowerCase() == this.lastSearch) {
+                if (a.label.toLowerCase() == lastSearchTerm) {
                     exactMatchIndex = c.length - 1;
                 }
             });
@@ -393,11 +401,11 @@ function Search(a) {
             if (exactMatchIndex != -1) {
                 var exactMatchTxt = c[exactMatchIndex];
                 c.splice(exactMatchIndex, 1);   // Remove the exact result
-                c.sort();   // Sort alphanumerically
+                c.sort(nodeCompare);   // Sort alphanumerically
                 c.splice(0, 0, exactMatchTxt); // Re-insert the exact match at the start
             }
             else {
-                c.sort();
+                c.sort(nodeCompare);
             }
 
             c.length ? (b = !0, nodeActive(c[0].id)) : b = showCluster(a);
