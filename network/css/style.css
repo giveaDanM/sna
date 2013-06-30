@@ -26,9 +26,6 @@ html,body {
 	line-height:1.25em;
 }
 
-dl {
-    margin-bottom: 0px;
-}
 .sigma-parent {
 	position: relative;
 	height: 100%;
@@ -395,7 +392,7 @@ padding-top: 1em;
 }
 
 #mainpanel dl {
-	padding-bottom:10px;
+	/*padding-bottom:10px;*/
 }
 
 #mainpanel h2 {
