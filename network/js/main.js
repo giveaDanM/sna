@@ -385,6 +385,13 @@ function Search(a) {
                     name: a.label
                 })
             });
+            // c is our results list. Let's sort it, putting any exact match at the top
+            c.sort();
+            var exactMatchIndex = c.indexOf(a);
+            if (exactMatchIndex != -1) {
+                c.splice(exactMatchIndex, 1);
+                c.splice(0, 0, a);
+            }
             c.length ? (b = !0, nodeActive(c[0].id)) : b = showCluster(a);
             a = ["<b>Search Results: </b>"];
             if (1 < c.length) for (var d = 0, h = c.length; d < h; d++) a.push('<a href="#' + c[d].name + '" onclick="nodeActive(\'' + c[d].id + "')\">" + c[d].name + "</a>");
