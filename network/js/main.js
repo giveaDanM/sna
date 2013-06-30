@@ -368,35 +368,38 @@ function Search(a) {
         this.state.removeClass("searching");
         this.input.val("");
     };
-    this.search = function (a) {
+    this.search = function (searchTerm) {
         var b = !1,
             c = [],
-            b = this.exactMatch ? ("^" + a + "$").toLowerCase() : a.toLowerCase(),
-            g = RegExp(b);
+            b = this.exactMatch ? ("^" + searchTerm + "$") : searchTerm,
+            g = RegExp(b, 'i');
         this.exactMatch = !1;
         this.searching = !0;
-        this.lastSearch = a;
+        this.lastSearch = searchTerm;
         this.results.empty();
-        if (2 >= a.length) this.results.html("<i>You must search for a name with a minimum of 3 letters.</i>");
+        if (2 >= searchTerm.length) this.results.html("<i>You must search for a name with a minimum of 3 letters.</i>");
         else {
+            var exactMatchIndex = -1;
             sigInst.iterNodes(function (a) {
-                g.test(a.label.toLowerCase()) && c.push({
+                g.test(a.label) && c.push({
                     id: a.id,
                     name: a.label
-                })
+                });
+                if (a.label.toLowerCase() == searchTerm.toLowerCase()) {
+                    exactMatchIndex = c.length - 1;
+                }
             });
             // c is our results list. Let's sort it, putting any exact match at the top
             c.sort();
-            var exactMatchIndex = c.indexOf(a);
             if (exactMatchIndex != -1) {
                 c.splice(exactMatchIndex, 1);
-                c.splice(0, 0, a);
+                c.splice(0, 0, exactItem);
             }
-            c.length ? (b = !0, nodeActive(c[0].id)) : b = showCluster(a);
+            c.length ? (b = !0, nodeActive(c[0].id)) : b = showCluster(searchTerm);
             a = ["<b>Search Results: </b>"];
-            if (1 < c.length) for (var d = 0, h = c.length; d < h; d++) a.push('<a href="#' + c[d].name + '" onclick="nodeActive(\'' + c[d].id + "')\">" + c[d].name + "</a>");
-            0 == c.length && !b && a.push("<i>No results found.</i>");
-            1 < a.length && this.results.html(a.join(""));
+            if (1 < c.length) for (var d = 0, h = c.length; d < h; d++) searchTerm.push('<a href="#' + c[d].name + '" onclick="nodeActive(\'' + c[d].id + "')\">" + c[d].name + "</a>");
+            0 == c.length && !b && searchTerm.push("<i>No results found.</i>");
+            1 < searchTerm.length && this.results.html(searchTerm.join(""));
            }
         if(c.length!=1) this.results.show();
         if(c.length==1) this.results.hide();   
