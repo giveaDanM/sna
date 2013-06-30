@@ -343,10 +343,10 @@ function Search(a) {
     this.lastSearch = "";
     this.searching = !1;
     var b = this;
-    var nodeCompare = function(a, b) {
-        if (a.label < b.label)
+    var resultSort = function(a, b) {
+        if (a.name < b.name)
             return -1;
-        if (a.label > b.label)
+        if (a.name > b.name)
             return 1;
         return 0;
     };
@@ -401,11 +401,11 @@ function Search(a) {
             if (exactMatchIndex != -1) {
                 var exactMatchTxt = c[exactMatchIndex];
                 c.splice(exactMatchIndex, 1);   // Remove the exact result
-                c.sort(nodeCompare);   // Sort alphanumerically
+                c.sort(resultSort);   // Sort alphanumerically
                 c.splice(0, 0, exactMatchTxt); // Re-insert the exact match at the start
             }
             else {
-                c.sort(nodeCompare);
+                c.sort(resultSort);
             }
 
             c.length ? (b = !0, nodeActive(c[0].id)) : b = showCluster(a);
