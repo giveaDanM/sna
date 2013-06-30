@@ -26,6 +26,9 @@ html,body {
 	line-height:1.25em;
 }
 
+dl {
+    margin-bottom: 0px;
+}
 .sigma-parent {
 	position: relative;
 	height: 100%;
@@ -275,7 +278,7 @@ padding: 6px 0 10px 0;
 
 #search {
 	border-top: 1px solid #999;
-	padding: 20px 0 0px 2px;
+	/*padding: 20px 0 0px 2px;*/
 }
 
 #search input[name=search] {
@@ -331,7 +334,7 @@ color: #fff;
 }
 
 #attributeselect {
-margin: 20px 0 13px 0 ;
+/*margin: 20px 0 13px 0 ;*/
 -webkit-touch-callout: none;
 -webkit-user-select: none;
 -khtml-user-select: none;
