@@ -344,9 +344,11 @@ function Search(a) {
     this.searching = !1;
     var b = this;
     var resultSort = function(a, b) {
-        if (a.name < b.name)
+        var aName = a..toLowerCase();
+        var bName = b..toLowerCase();
+        if (aName < bName)
             return -1;
-        if (a.name > b.name)
+        if (aName > bName)
             return 1;
         return 0;
     };
@@ -379,7 +381,7 @@ function Search(a) {
         var b = !1,
             c = [],
             b = this.exactMatch ? ("^" + a + "$").toLowerCase() : a.toLowerCase(),
-            g = RegExp(b);
+            g = RegExp(b.replace(/.{3} /g, "$&.*"));
         this.exactMatch = !1;
         this.searching = !0;
         this.lastSearch = a;
@@ -413,7 +415,7 @@ function Search(a) {
             if (1 < c.length) for (var d = 0, h = c.length; d < h; d++) a.push('<a href="#' + c[d].name + '" onclick="nodeActive(\'' + c[d].id + "')\">" + c[d].name + "</a>");
             0 == c.length && !b && a.push("<i>No results found.</i>");
             1 < a.length && this.results.html(a.join(""));
-           }
+        }
         if(c.length!=1) this.results.show();
         if(c.length==1) this.results.hide();   
     }
