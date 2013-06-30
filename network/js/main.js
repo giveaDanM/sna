@@ -344,8 +344,8 @@ function Search(a) {
     this.searching = !1;
     var b = this;
     var resultSort = function(a, b) {
-        var aName = a..toLowerCase();
-        var bName = b..toLowerCase();
+        var aName = a.toLowerCase();
+        var bName = b.toLowerCase();
         if (aName < bName)
             return -1;
         if (aName > bName)
