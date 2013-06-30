@@ -578,6 +578,10 @@ function nodeActive(a) {
             e.push(h)
         }
 
+        $('#subreddit-logo').attr('src', 'http://metareddit.com/static/logos/' + b.label + '.png');
+        $('#subreddit-logo').attr('alt', b.label);
+        $('#subreddit-logo').attr('title', b.label);
+
         if (image_attribute) {
         	//image_index = jQuery.inArray(image_attribute, temp_array);
         	$GP.info_name.html("<div><img src=" + f.attributes[image_attribute] + " style=\"vertical-align:middle\" /> <span onmouseover=\"sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex['" + b.id + '\'])" onmouseout="sigInst.refresh()">' + b.label + "</span></div>");

@@ -78,11 +78,15 @@ canvas#sigma_bg_1 {
 #attributepane .headertext {
 	color: #000;
 	margin-bottom: 5px;
-	height: 14px;
+	/*height: 14px;*/
 	border-bottom: 1px solid #999;
 	padding: 0px 0 10px 0;
 	font-size:16px;
 	font-weight:bold;
+}
+
+#subreddit-logo {
+    height: 40px;
 }
 
 
