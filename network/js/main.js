@@ -371,31 +371,35 @@ function Search(a) {
     this.search = function (a) {
         var b = !1,
             c = [],
-            b = this.exactMatch ? ("^" + a + "$") : a,
-            g = RegExp(b, 'i');
+            b = this.exactMatch ? ("^" + a + "$").toLowerCase() : a.toLowerCase(),
+            g = RegExp(b);
         this.exactMatch = !1;
         this.searching = !0;
         this.lastSearch = a;
         this.results.empty();
-        var searchTerm = a;
         if (2 >= a.length) this.results.html("<i>You must search for a name with a minimum of 3 letters.</i>");
         else {
             var exactMatchIndex = -1;
             sigInst.iterNodes(function (a) {
-                g.test(a.label) && c.push({
+                g.test(a.label.toLowerCase()) && c.push({
                     id: a.id,
                     name: a.label
                 });
-                if (a.label.toLowerCase() == searchTerm.toLowerCase()) {
-                    exactMatchIndex = c.length + 1;
+                if (a.label.toLowerCase() == this.lastSearch) {
+                    exactMatchIndex = c.length - 1;
                 }
             });
             // c is our results list. Let's sort it, putting any exact match at the top
-            c.sort();
             if (exactMatchIndex != -1) {
-                c.splice(exactMatchIndex, 1);
-                c.splice(0, 0, exactItem);
+                var exactMatchTxt = c[exactMatchIndex];
+                c.splice(exactMatchIndex, 1);   // Remove the exact result
+                c.sort();   // Sort alphanumerically
+                c.splice(0, 0, exactMatchTxt); // Re-insert the exact match at the start
             }
+            else {
+                c.sort();
+            }
+
             c.length ? (b = !0, nodeActive(c[0].id)) : b = showCluster(a);
             a = ["<b>Search Results: </b>"];
             if (1 < c.length) for (var d = 0, h = c.length; d < h; d++) a.push('<a href="#' + c[d].name + '" onclick="nodeActive(\'' + c[d].id + "')\">" + c[d].name + "</a>");
