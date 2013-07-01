@@ -293,7 +293,7 @@ function configSigmaElements(config) {
                     else {
                         e.hidden = 1;
                     }
-                };
+                });
             }
         }).bind('outnodes',function(event){
             if (!sigInst.active) {
