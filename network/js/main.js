@@ -293,12 +293,6 @@ function configSigmaElements(config) {
                 else {
                     e.hidden = 1;
                 }
-            }).iterNodes(function(n){
-                if(!neighbors[n.id]){
-                    n.hidden = 1;
-                }else{
-                    n.hidden = 0;
-              }
             }).draw(2,2,2);
 		}).bind('outnodes',function(){
             sigInst.iterEdges(function(e){
