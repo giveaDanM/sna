@@ -368,6 +368,7 @@ color: #fff;
 -moz-user-select: none;
 -ms-user-select: none;
 user-select: none;
+display: none;
 }
 
 #attributeselect .select {

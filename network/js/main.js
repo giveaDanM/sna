@@ -590,12 +590,19 @@ function nodeActive(a) {
             colour: c[g].colour
         })
     }
+    /*
     e.sort(function (a, b) {
         var c = a.group.toLowerCase(),
             d = b.group.toLowerCase(),
             e = a.name.toLowerCase(),
             f = b.name.toLowerCase();
         return c != d ? c < d ? -1 : c > d ? 1 : 0 : e < f ? -1 : e > f ? 1 : 0
+    });
+    */
+    e.sort(function (a, b) {
+        var aName = a.name.toLowerCase(),
+            bName = b.name.toLowerCase();
+        return aName < bName ? -1 : aName > bName ? 1 : 0;
     });
     d = "";
 		for (g in e) {
