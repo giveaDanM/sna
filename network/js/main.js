@@ -287,13 +287,13 @@ function configSigmaElements(config) {
                 var nodes = event.content;
                 sigInst.iterEdges(function(e){
                     // Show all connected edges
-                    if(nodes.indexOf(e.source)>=0 || nodes.indexOf(e.target)>=0){
+                    if (nodes.indexOf(e.source) >= 0 || nodes.indexOf(e.target) >= 0) {
                         e.hidden = 0;
                     }
                     else {
                         e.hidden = 1;
                     }
-                }
+                };
             }
         }).bind('outnodes',function(event){
             if (!sigInst.active) {
@@ -305,7 +305,6 @@ function configSigmaElements(config) {
                 }).draw(2,2,2);
             }
 		}).draw(2,2,2);
-
     }
     $GP.bg = $(sigInst._core.domElements.bg);
     $GP.bg2 = $(sigInst._core.domElements.bg2);
