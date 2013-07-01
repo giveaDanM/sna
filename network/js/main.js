@@ -280,6 +280,34 @@ function configSigmaElements(config) {
 		}).draw(2,2,2);
 		});
 
+    } else if (config.features.hoverBehavior == "none") {
+
+		sigInst.bind('overnodes',function(event){
+			var nodes = event.content;
+			var neighbors = {};
+            sigInst.iterEdges(function(e){
+                // Show all connected edges
+                if(nodes.indexOf(e.source)>=0 || nodes.indexOf(e.target)>=0){
+                    e.hidden = 0;
+                }
+                else {
+                    e.hidden = 1;
+                }
+            }).iterNodes(function(n){
+                if(!neighbors[n.id]){
+                    n.hidden = 1;
+                }else{
+                    n.hidden = 0;
+              }
+            }).draw(2,2,2);
+		}).bind('outnodes',function(){
+            sigInst.iterEdges(function(e){
+                e.hidden = 1;
+            }).iterNodes(function(n){
+                n.hidden = 0;
+            }).draw(2,2,2);
+		});
+
     }
     $GP.bg = $(sigInst._core.domElements.bg);
     $GP.bg2 = $(sigInst._core.domElements.bg2);
