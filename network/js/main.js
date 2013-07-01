@@ -109,6 +109,7 @@ function initSigma(config) {
 
 		a.draw();
 		configSigmaElements(config);
+        $('.loading').hide();
 	}
 
     if (data.indexOf("gexf")>0 || data.indexOf("xml")>0)
