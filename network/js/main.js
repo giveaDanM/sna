@@ -288,10 +288,10 @@ function configSigmaElements(config) {
                 sigInst.iterEdges(function(e){
                     // Show all connected edges
                     if (nodes.indexOf(e.source) >= 0 || nodes.indexOf(e.target) >= 0) {
-                        e.hidden = 0;
+                        e.hidden = false;
                     }
                     else {
-                        e.hidden = 1;
+                        e.hidden = true;
                     }
                 });
             }
@@ -299,9 +299,9 @@ function configSigmaElements(config) {
             if (!sigInst.active) {
                 // Hide all edges and show all nodes - as long as we haven't selected a node
                 sigInst.iterEdges(function(e){
-                    e.hidden = 1;
+                    e.hidden = true;
                 }).iterNodes(function(n){
-                    n.hidden = 0;
+                    n.hidden = false;
                 }).draw(2,2,2);
             }
 		}).draw(2,2,2);
@@ -438,7 +438,7 @@ function Search(a) {
             c.length ? (b = !0, nodeActive(c[0].id)) : b = showCluster(a);
             a = ["<b>Search Results: </b>"];
             if (1 < c.length) for (var d = 0, h = c.length; d < h; d++) a.push('<a href="#' + c[d].name + '" onclick="nodeActive(\'' + c[d].id + "')\">" + c[d].name + "</a>");
-            0 == c.length && !b && a.push("<i>No results found.</i>");
+            if (0 == c.length && !b && a.push("<i>No results found.</i>");
             1 < a.length && this.results.html(a.join(""));
         }
         if(c.length!=1) this.results.show();
@@ -499,7 +499,12 @@ function nodeActive(a) {
 	
     sigInst.neighbors = {};
     sigInst.detail = !0;
+
+    sigInst.position(0, 0, 1);  // Hack to get correct coords
     var b = sigInst._core.graph.nodesIndex[a];
+    // Zoom in on active node location
+    sigInst.goTo(b.displayX, b.displayY, 25);
+
     showGroups(!1);
 	var outgoing={},incoming={},mutual={}, _neighbours = {};//SAH
     sigInst.iterEdges(function (b) {
