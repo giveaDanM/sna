@@ -245,11 +245,11 @@ margin-right:10px;
     padding: 2px 4px;
 }
 
-.loading#loading-msg {
+.loading #loading-msg {
     font-size: 14px;
 }
 
-.loading#loading-gif {
+.loading #loading-gif {
 }
 
 #maintitle {
