@@ -506,7 +506,8 @@ function nodeActive(a) {
                 name: b.label,
                 colour: b.color
             };
-            sigInst.neighbors[a == b.target ? b.source : b.target] = 1;
+            sigInst.neighbors[a == b.target ? b.source : b.target] = n;
+            _neighbours[a == b.target ? b.source : b.target] = 1;
         }
         else {
             b.hidden = true;
