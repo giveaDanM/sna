@@ -281,26 +281,30 @@ function configSigmaElements(config) {
 		});
 
     } else if (config.features.hoverBehavior == "none") {
-
 		sigInst.bind('overnodes',function(event){
-			var nodes = event.content;
-			var neighbors = {};
-            sigInst.iterEdges(function(e){
-                // Show all connected edges
-                if(nodes.indexOf(e.source)>=0 || nodes.indexOf(e.target)>=0){
-                    e.hidden = 0;
+            if (!sigInst.active) {
+                // Hide all edges and show all nodes - as long as we haven't selected a node
+                var nodes = event.content;
+                sigInst.iterEdges(function(e){
+                    // Show all connected edges
+                    if(nodes.indexOf(e.source)>=0 || nodes.indexOf(e.target)>=0){
+                        e.hidden = 0;
+                    }
+                    else {
+                        e.hidden = 1;
+                    }
                 }
-                else {
+            }
+        }).bind('outnodes',function(event){
+            if (!sigInst.active) {
+                // Hide all edges and show all nodes - as long as we haven't selected a node
+                sigInst.iterEdges(function(e){
                     e.hidden = 1;
-                }
-            }).draw(2,2,2);
-		}).bind('outnodes',function(){
-            sigInst.iterEdges(function(e){
-                e.hidden = 1;
-            }).iterNodes(function(n){
-                n.hidden = 0;
-            }).draw(2,2,2);
-		});
+                }).iterNodes(function(n){
+                    n.hidden = 0;
+                }).draw(2,2,2);
+            }
+		}).draw(2,2,2);
 
     }
     $GP.bg = $(sigInst._core.domElements.bg);
