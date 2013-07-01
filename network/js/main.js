@@ -500,25 +500,23 @@ function nodeActive(a) {
     showGroups(!1);
 	var outgoing={},incoming={},mutual={};//SAH
     sigInst.iterEdges(function (b) {
-        b.attr.lineWidth = !1;
-        b.hidden = !0;
-        
-        n={
-            name: b.label,
-            colour: b.color
-        };
-        
-   	   if (a==b.source) outgoing[b.target]=n;		//SAH
-	   else if (a==b.target) incoming[b.source]=n;		//SAH
-       if (a == b.source || a == b.target) sigInst.neighbors[a == b.target ? b.source : b.target] = n;
-       b.hidden = !1, b.attr.color = "rgba(0, 0, 0, 1)";
+        if (a == b.source || a == b.target) {
+            b.hidden = false;
+            sigInst.neighbors[a == b.target ? b.source : b.target] = n;
+        }
+        else {
+            b.hidden = true;
+        }
+    });
+    sigInst.iterNodes(function (_node) {
+        if (sigInst.neighbours(_node.id) == -1) {
+            _node.hidden = true;
+        }
+        else {
+            _node.hidden = false;
+        }
     });
     var f = [];
-    sigInst.iterNodes(function (a) {
-        a.hidden = !0;
-        a.attr.lineWidth = !1;
-        a.attr.color = a.color
-    });
     
     if (groupByDirection) {
 		//SAH - Compute intersection for mutual and remove these from incoming/outgoing
