@@ -520,6 +520,10 @@ function nodeActive(a) {
         else {
             b.hidden = true;
         }
+    }).iterEdges(function (edge) {
+        // Complete the local network
+        if (_neighbours.indexOf(edge.source) != -1 && _neighbours.indexOf(edge.target) != -1)
+            edge.hidden = false;
     });
     sigInst.iterNodes(function (_node) {
         if (_neighbours.hasOwnProperty(_node.id)) {
