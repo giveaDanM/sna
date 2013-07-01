@@ -663,7 +663,7 @@ function nodeActive(a) {
         e = [];
         temp_array = [];
         g = 0;
-        var attrsToSkip = ['Modularity Class'];
+        var attrsToSkip = ['Degree', 'Modularity Class', 'Weighted Degree'];
         for (var attr in f.attributes) {
             if (attrsToSkip.indexOf(attr) == -1) {
                 var d = f.attributes[attr],
