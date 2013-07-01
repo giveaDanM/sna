@@ -455,12 +455,18 @@ background-repeat: no-repeat;
 margin-left: 5px;
 }
 
+#copyright-info,
 #copyright {
 	margin:0 auto;	
 	position: fixed;
 	right: 40px;
 	bottom: 25px;
 	z-index:0;
+}
+
+#copyright-info  {
+    right: 0px;
+    bottom: 0px;
 }
 
 #copyright a {
