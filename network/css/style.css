@@ -471,6 +471,13 @@ margin-left: 5px;
     display; inline-block;
 }
 
+.sigma-font {
+    font-family: lobster, Arial, Helvetica, sans-serif;
+    font-weight: normal;
+    text-decoration: none;
+    display: inline;
+}
+
 #copyright a {
 color: #000;
 }
