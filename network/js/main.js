@@ -500,10 +500,10 @@ function nodeActive(a) {
     sigInst.neighbors = {};
     sigInst.detail = !0;
 
-    sigInst.position(0, 0, 1);  // Hack to get correct coords
+    sigInst.position(0, 0, 1).draw();  // Hack to get correct coords
     var b = sigInst._core.graph.nodesIndex[a];
     // Zoom in on active node location
-    sigInst.goTo(b.displayX, b.displayY, 25);
+    sigInst.goTo(b.displayX, b.displayY, config.sigma.mouseProperties.maxRatio / 2);
 
     showGroups(!1);
 	var outgoing={},incoming={},mutual={}, _neighbours = {};//SAH
