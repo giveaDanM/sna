@@ -43,6 +43,23 @@ Object.size = function(obj) {
     return size;
 };
 
+
+function showLoading() {
+    var loadingMsg = $('.loading');
+    var loadingMsgTxt = $('#loading-msg', loadingMsg);
+    if (Math.random() < 0.1) {
+        loadingMsgTxt.html('Reticulating splines');
+    }
+    loadingMsg.show();
+}
+
+function hideLoading() {
+    var loadingMsg = $('.loading');
+    loadingMsg.hide();
+    var loadingMsgTxt = $('#loading-msg', loadingMsg);
+    loadingMsgTxt.html('Loading');
+}
+
 function initSigma(config) {
 	var data=config.data
 	
@@ -109,7 +126,7 @@ function initSigma(config) {
 
 		a.draw();
 		configSigmaElements(config);
-        $('.loading').hide();
+        hideLoading();
 	}
 
     if (data.indexOf("gexf")>0 || data.indexOf("xml")>0)
@@ -495,6 +512,8 @@ function nodeNormal() {
 
 function nodeActive(a) {
 
+    showLoading();
+    
 	var groupByDirection=false;
 	if (config.informationPanel.groupByEdgeDirection && config.informationPanel.groupByEdgeDirection==true)	groupByDirection=true;
 	
@@ -652,7 +671,9 @@ function nodeActive(a) {
         	$GP.info_name.html("<div><span onmouseover=\"sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex['" + b.id + '\'])" onmouseout="sigInst.refresh()"><a target="_blank" title="Go to /r/' + b.label + '" href="http://reddit.com/r/' + b.label + '/">' + b.label + "</a></span></div>");
         }
         // Image field for attribute pane
-        $GP.info_data.html(e.join("<br/>"))
+        $GP.info_data.html(e.join("<br/>"));
+        
+        hideLoading();
     }
     sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex[b.id]);  // Highlight the current node
     $GP.info_data.show();
