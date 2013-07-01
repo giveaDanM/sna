@@ -653,6 +653,7 @@ function nodeActive(a) {
         // Image field for attribute pane
         $GP.info_data.html(e.join("<br/>"))
     }
+    sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex[b.id]);  // Highlight the current node
     $GP.info_data.show();
     $GP.info_p.html("Connections:");
     $GP.info.animate({width:'show'},350);
