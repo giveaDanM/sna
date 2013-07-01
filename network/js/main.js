@@ -522,7 +522,7 @@ function nodeActive(a) {
         }
     }).iterEdges(function (edge) {
         // Complete the local network
-        if (_neighbours.indexOf(edge.source) != -1 && _neighbours.indexOf(edge.target) != -1)
+        if (_neighbours.hasOwnProperty(edge.source) != -1 && _neighbours.hasOwnProperty(edge.target) != -1)
             edge.hidden = false;
     });
     sigInst.iterNodes(function (_node) {
