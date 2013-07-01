@@ -120,6 +120,12 @@ function initSigma(config) {
 		
 		);
 	
+        a.bind("overnodes", function (a) {
+            document.body.style.cursor = "pointer";
+        });
+        a.bind("outnodes", function (a) {
+            document.body.style.cursor = "auto";
+        });
 		a.bind("upnodes", function (a) {
 		    nodeActive(a.content[0])
 		});
