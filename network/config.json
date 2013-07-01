@@ -13,8 +13,8 @@
     "intro": "An interactive map of <a href=\"http:\/\/reddit.com\/\">Reddit<\/a>, the \"front page of the internet\""
   },
   "legend": {
-    "edgeLabel": "cross-post",
-    "colorLabel": "Number of connections (degree)",
+    "edgeLabel": "Cross-posts",
+    "colorLabel": "Number of connections (degree). Red = lots, blue = few",
     "nodeLabel": "Subreddit"
   },
   "features": {
