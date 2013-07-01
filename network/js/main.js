@@ -498,22 +498,26 @@ function nodeActive(a) {
     sigInst.detail = !0;
     var b = sigInst._core.graph.nodesIndex[a];
     showGroups(!1);
-	var outgoing={},incoming={},mutual={};//SAH
+	var outgoing={},incoming={},mutual={}, _neighbours = {};//SAH
     sigInst.iterEdges(function (b) {
         if (a == b.source || a == b.target) {
             b.hidden = false;
-            sigInst.neighbors[a == b.target ? b.source : b.target] = n;
+            n={
+                name: b.label,
+                colour: b.color
+            };
+            sigInst.neighbors[a == b.target ? b.source : b.target] = 1;
         }
         else {
             b.hidden = true;
         }
     });
     sigInst.iterNodes(function (_node) {
-        if (sigInst.neighbours(_node.id) == -1) {
-            _node.hidden = true;
+        if (_neighbours.hasOwnProperty(_node.id)) {
+            _node.hidden = false;
         }
         else {
-            _node.hidden = false;
+            _node.hidden = true;
         }
     });
     var f = [];
