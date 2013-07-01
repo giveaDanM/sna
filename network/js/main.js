@@ -663,14 +663,17 @@ function nodeActive(a) {
         e = [];
         temp_array = [];
         g = 0;
+        var attrsToSkip = ['Modularity Class'];
         for (var attr in f.attributes) {
-            var d = f.attributes[attr],
-                h = "";
-			if (attr!=image_attribute) {
-                h = '<span><strong>' + attr + ':</strong> ' + d + '</span><br/>'
-			}
-            //temp_array.push(f.attributes[g].attr);
-            e.push(h)
+            if (attrsToSkip.indexOf(attr) == -1) {
+                var d = f.attributes[attr],
+                    h = "";
+                if (attr!=image_attribute) {
+                    h = '<span><strong>' + attr + ':</strong> ' + d + '</span><br/>'
+                }
+                //temp_array.push(f.attributes[g].attr);
+                e.push(h);
+            }
         }
 
         $('#subreddit-logo').attr('src', 'http://metareddit.com/static/logos/' + b.label + '.png');
