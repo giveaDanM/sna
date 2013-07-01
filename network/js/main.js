@@ -672,8 +672,6 @@ function nodeActive(a) {
         }
         // Image field for attribute pane
         $GP.info_data.html(e.join("<br/>"));
-        
-        hideLoading();
     }
     sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex[b.id]);  // Highlight the current node
     $GP.info_data.show();
@@ -683,6 +681,7 @@ function nodeActive(a) {
 	$GP.info_donnees.show();
     sigInst.active = a;
     window.location.hash = b.label;
+    hideLoading();
 }
 
 function showCluster(a) {
