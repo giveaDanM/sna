@@ -47,7 +47,7 @@ Object.size = function(obj) {
 function showLoading() {
     var loadingMsg = $('.loading');
     var loadingMsgTxt = $('#loading-msg', loadingMsg);
-    if (Math.random() < 0.2) {
+    if (Math.random() < 0.333) {
         loadingMsgTxt.html('Reticulating splines');
     }
     loadingMsg.show();
