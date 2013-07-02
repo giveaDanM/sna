@@ -5,6 +5,7 @@ html, body {
 }
 
 .container {
+    width: 100%;
 }
 
 #main {
