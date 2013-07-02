@@ -47,7 +47,7 @@ Object.size = function(obj) {
 function showLoading() {
     var loadingMsg = $('.loading');
     var loadingMsgTxt = $('#loading-msg', loadingMsg);
-    if (Math.random() < 0.1) {
+    if (Math.random() < 0.2) {
         loadingMsgTxt.html('Reticulating splines');
     }
     loadingMsg.show();
@@ -694,8 +694,8 @@ function nodeActive(a) {
     $GP.info_p.html("Connections:");
     $GP.info.animate({width:'show'},350);
 	$GP.info_donnees.hide();
-    sigInst.position(0, 0, 1).draw(hideLoading);
-	$GP.info_donnees.show();
+    sigInst.position(0, 0, 1).draw();
+	$GP.info_donnees.show({complete: hideLoading});
     sigInst.active = a;
     window.location.hash = b.label;
 }
