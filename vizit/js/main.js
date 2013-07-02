@@ -694,10 +694,9 @@ function nodeActive(a) {
     $GP.info_p.html("Connections:");
     $GP.info.animate({width:'show'},350);
 	$GP.info_donnees.hide();
-	$GP.info_donnees.show();
+	$GP.info_donnees.show({complete: hideLoading});
     sigInst.active = a;
     window.location.hash = b.label;
-    hideLoading();
 }
 
 function showCluster(a) {
