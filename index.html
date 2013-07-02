@@ -1,7 +1,9 @@
 <html>
     <head>
-        <title>Subreddit connections</title>
+        <title>Reddit graph analysis</title>
         <link rel="shortcut icon" href="img/reddit.png" />
+        <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" media="screen" />
+        <link rel="stylesheet" href="css/font-awesome.min.css">
         <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet" type="text/css">
         <link rel="stylesheet" type="text/css" href="css/main.css">
         <script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
@@ -16,7 +18,17 @@
     </head>
     <body>
         <!-- URL shortened to http://goo.gl/ReMvh -->
-        <div id="main">
+        <div id="main container">
+            <div class="navbar">
+            <div class="navbar-inner">
+                <a class="brand" href="#">Reddalysis</a>
+                <ul class="nav">
+                    <li class="active"><a href="..">Home</a></li>
+                    <li><a href="selfposts.html">Self-post graph</a></li>
+                    <li><a href="vizit">Vizit</a></li>
+                </ul>
+                </div>
+            </div>
             <h1 id="main-title">The Reddit network</h1>
             <p>
                 In April 2013 <a target="_blank" href="http://www.reddit.com/r/TheoryOfReddit/comments/1ava66/has_anyone_ever_made_a_graph_of_how_all_the/">I posed the question</a>: has anyone ever tried to perform social network analysis on <a target="_blank" href="http://www.reddit.com">Reddit</a> by visualising the links between different subreddits? As you can see from the discussion on that page, several other attempts have also been made at answering this question, mainly by using sidebar links to define connections between subreddits.
@@ -31,6 +43,9 @@
             <h2><a href="xposts.html">Xpost map</a></h2>
             <p>
                 In this graph, associations are defined by common links, i.e. if the same website is linked to from two different subreddits, then that's an association. Beware, this graph is quite big and may require a lot of resources to render!
+            </p>
+            <p class="footnote">
+                If you'd like to make use of any of this work feel free, it's all open-sourced - license details are available on each individual page. All I ask is that you <a target="_blank" href="http://www.reddit.com/message/compose/?to=sharkbait784&subject=Reddalysis">let me know</a> first.
             </p>
         </div>
     </body>

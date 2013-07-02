@@ -26,6 +26,10 @@ html,body {
 	line-height:1.25em;
 }
 
+.container {
+    width: 100%;
+}
+
 .sigma-parent {
 	position: relative;
 	height: 100%;
