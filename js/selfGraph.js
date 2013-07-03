@@ -1,11 +1,6 @@
 var getGraph;
 
 $(document).ready(function() {
-    if (navigator.appName == "Microsoft Internet Explorer") {
-        $('#graph').css({color:"white", textAlign:"center", verticalAlign:"middle"}).html("Sorry, but this feature is not supported by Internet Explorer. Please try a different web browser.");
-        return;
-    }
-
     // Instanciate sigma.js and customize rendering :
     var sigInst = sigma.init(document.getElementById('graph')).drawingProperties({
         defaultLabelColor: '#fff',
@@ -23,9 +18,9 @@ $(document).ready(function() {
         maxRatio: 200
     });
 
-    // Parse a GEXF encoded file to fill the graph
-    // (requires "sigma.parseGexf.js" to be included)
-    sigInst.parseGexf(graphData);
+    // Parse a JSON encoded file to fill the graph
+    // (requires "sigma.parseJson.js" to be included)
+    sigInst.parseJson(graphData);
 
     // Bind events :
     var hideUnconnected = function(event) {
