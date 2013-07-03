@@ -30,7 +30,7 @@ html,body {
     display: inline-block;
 }
 
-#developercontainer>div.sigma-brand {
+#developercontainer>div#sigma-brand {
     display: block;
 }
 
