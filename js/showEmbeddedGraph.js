@@ -188,7 +188,7 @@ $(document).ready(function() {
         }, 1);
     });
 
-    // Draw the graph :
+    // Draw the graph:
     sigInst.activateFishEye().draw();
 
     // Add getter for dev work
