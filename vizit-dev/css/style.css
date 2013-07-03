@@ -34,6 +34,14 @@ html,body {
     display: block;
 }
 
+.twitter-tweet {
+    width: 80px;
+}
+
+.g-plusone {
+    width: 60px;
+}
+
 .sigma-parent {
 	position: relative;
 	height: 100%;
