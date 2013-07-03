@@ -1,5 +1,21 @@
 var getGraph;
 
+var ie = (function(){
+
+    var undef,
+        v = 3,
+        div = document.createElement('div'),
+        all = div.getElementsByTagName('i');
+
+    while (
+        div.innerHTML = '<!--[if gt IE ' + (++v) + ']><i></i><![endif]-->',
+        all[0]
+    );
+
+    return v > 4 ? v : undef;
+
+}());
+
 $(document).ready(function() {
     // Set the graph height first
     var controls = $('#controls');
@@ -9,8 +25,8 @@ $(document).ready(function() {
     $('#graph').css('height',
             $('#graph-wrapper-embedded').height() - (2 * bodyMargin) - (2 * footerPadding) - $('#controls').height() - $('#footnote-license').height() + "px");
 
-    if (navigator.appName == "Microsoft Internet Explorer") {
-        $('#graph').css({color:"white", textAlign:"center", verticalAlign:"middle"}).html("Sorry, but this feature is not supported by Internet Explorer. Please try a different web browser.");
+    if (ie < 9) {
+        $('#graph').css({color:"white", textAlign:"center", verticalAlign:"middle"}).html("Sorry, but this feature is not supported by versions of Internet Explorer less than 9. Please upgrade or try a different web browser.");
         return;
     }
     
@@ -31,9 +47,9 @@ $(document).ready(function() {
         maxRatio: 200
     });
 
-    // Parse a GEXF encoded file to fill the graph
-    // (requires "sigma.parseGexf.js" to be included)
-    sigInst.parseGexf(graphData);
+    // Parse a JSON encoded file to fill the graph
+    // (requires "sigma.parseJson.js" to be included)
+    sigInst.parseJson(graphData);
 
     // Bind events :
     var hideUnconnected = function(event) {
