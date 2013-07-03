@@ -25,10 +25,12 @@ $(document).ready(function() {
     $('#graph').css('height',
             $('#graph-wrapper-embedded').height() - (2 * bodyMargin) - (2 * footerPadding) - $('#controls').height() - $('#footnote-license').height() + "px");
 
+    /*
     if (ie < 9) {
         $('#graph').css({color:"white", textAlign:"center", verticalAlign:"middle"}).html("Sorry, but this feature is not supported by versions of Internet Explorer less than 9. Please upgrade or try a different web browser.");
         return;
     }
+    */
     
     // Instanciate sigma.js and customize rendering :
     var sigInst = sigma.init(document.getElementById('graph')).drawingProperties({
