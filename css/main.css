@@ -85,6 +85,10 @@ html, body {
     padding: 4px;
 }
 
+#likebuttons {
+    float: right;
+}
+
 .datetime {
     display: inline;
     font-weight: bold;
