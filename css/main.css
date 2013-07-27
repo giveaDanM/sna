@@ -22,6 +22,7 @@ html, body {
 
 #header {
     background-image: url('../img/header.png');
+    background-color: #333;
     background-repeat: no-repeat;
     color: #FFF;
     width: 80%;
