@@ -689,7 +689,7 @@ function nodeActive(a) {
 
 		$.ajax({
             dataType: "json",
-            url: "http://www.reddit.com/r/" + b.label + "/about.json?jsonp=?",
+            url: "http://www.reddit.com/r/" + b.label + "/about.json",
             success: function(about) {
                 SRimage = about.data.header_img;
                 SRdesc = about.data.public_description;;
