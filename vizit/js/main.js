@@ -678,7 +678,7 @@ function nodeActive(a) {
 
         // pull info about the activated subreddit from reddit
 		var SRimage = null;
-		var SRdesc = "";
+		var SRdesc = null;
 		
 		$.getJSON("http://www.reddit.com/r/" + b.label + "/about.json?jsonp=?",
 			function parse(data)
@@ -688,10 +688,21 @@ function nodeActive(a) {
 			}
         )
         .success(function() { ; })
-        .error(function() { SRimage = "http://metareddit.com/static/logos/" + b.label + ".png"; SRdesc = ""; })
+        .error(function() {
+            SRimage = null;
+            SRdesc = null;
+        })
         .complete(function() {
 			if (SRdesc == null) { SRdesc = ""; }
-			if (SRimage == null) { SRimage = "http://metareddit.com/static/logos/" + b.label + ".png"; }
+			if (SRimage == null) {
+                var metaredditImg = "http://metareddit.com/static/logos/" + b.label + ".png";
+                if (resourceExists(metaredditImg)) {
+                    SRimage = metaredditImg;
+                }
+                else {
+                    SRimage = "img/sub-default.png";
+                }
+            }
 			
 			$('#subreddit-logo').attr('src', SRimage);
 			$('#subreddit-logo').attr('alt', b.label);
