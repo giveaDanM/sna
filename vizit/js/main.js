@@ -680,9 +680,9 @@ function nodeActive(a) {
 		var SRimage = null;
 		var SRdesc = null;
 
-		$.jsonp({
-            dataType: "jsonp",
-            url: "http://www.reddit.com/r/" + b.label + "/about.json",
+		$.ajax({
+            dataType: "json",
+            url: "http://www.reddit.com/r/" + b.label + "/about.json?jsonp=?",
             success: function(about) {
                 SRimage = about.data.header_img;
                 SRdesc = about.data.public_description;;
