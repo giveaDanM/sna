@@ -678,8 +678,13 @@ function nodeActive(a) {
 
         // pull info about the activated subreddit from reddit
 		var SRimage = null;
+        $('#subreddit-logo').attr('src', 'http://www.redditstatic.com/about/assets/reddit-logo.png');
+        $('#subreddit-logo').attr('alt', b.label);
+        $('#subreddit-logo').attr('title', b.label);
+        $GP.info_name.html("<div><span onmouseover=\"sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex['" + b.id + '\'])" onmouseout="sigInst.refresh()"><a target="_blank" title="Go to /r/' + b.label + '" href="http://reddit.com/r/' + b.label + '/">' + b.label + ' <i class="icon-external-link"></i></a><br /><br />' + '</span></div>');
 		var SRdesc = null;
 
+        // TODO: Fix error handling for JSONP
 		$.ajax({
             dataType: "jsonp",
             url: "http://www.reddit.com/r/" + b.label + "/about.json?jsonp=?",
