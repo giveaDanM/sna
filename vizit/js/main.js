@@ -700,13 +700,7 @@ function nodeActive(a) {
             },
             complete: function() {
                 if (SRimage == null || SRimage == "") {
-                    var metaredditImg = "http://metareddit.com/static/logos/" + b.label + ".png";
-                    if (resourceExists(metaredditImg)) {
-                        SRimage = metaredditImg;
-                    }
-                    else {
-                        SRimage = "img/sub-default.png";
-                    }
+                    SRimage = "http://metareddit.com/static/logos/" + b.label + ".png";
                 }
                 
                 $('#subreddit-logo').attr('src', SRimage);
@@ -716,7 +710,7 @@ function nodeActive(a) {
                 // Image field for attribute pane
                 if (image_attribute) {
                     //image_index = jQuery.inArray(image_attribute, temp_array);
-                    $GP.info_name.html("<div><img src=" + f.attributes[image_attribute] + " style=\"vertical-align:middle\" /> <span onmouseover=\"sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex['" + b.id + '\'])" onmouseout="sigInst.refresh()">' + b.label + "</span></div>");
+                    $GP.info_name.html("<div><img src=" + f.attributes[image_attribute] + ' onerror="this.src=\'img/sub-default.png\';"' + " style=\"vertical-align:middle\" /> <span onmouseover=\"sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex['" + b.id + '\'])" onmouseout="sigInst.refresh()">' + b.label + "</span></div>");
                 } else {
                     $GP.info_name.html("<div><span onmouseover=\"sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex['" + b.id + '\'])" onmouseout="sigInst.refresh()"><a target="_blank" title="Go to /r/' + b.label + '" href="http://reddit.com/r/' + b.label + '/">' + b.label + ' <i class="icon-external-link"></i></a><br /><br />' + SRdesc + '</span></div>');
                 }
