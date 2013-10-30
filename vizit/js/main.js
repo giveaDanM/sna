@@ -60,6 +60,13 @@ function hideLoading() {
     loadingMsgTxt.html('Loading');
 }
 
+function resourceExists(url) {
+    var http = new XMLHttpRequest();
+    http.open('HEAD', url, false);
+    http.send();
+    return http.status != 404;
+}
+
 function initSigma(config) {
 	var data=config.data
 	
@@ -679,22 +686,20 @@ function nodeActive(a) {
         // pull info about the activated subreddit from reddit
 		var SRimage = null;
 		var SRdesc = null;
-		
-		$.getJSON("http://www.reddit.com/r/" + b.label + "/about.json?jsonp=?",
-			function parse(data)
-			{
-				SRimage = data.data.header_img;
-				SRdesc = data.data.public_description;
-			}
+
+		$.getJSON({
+            url: "http://www.reddit.com/r/" + b.label + "/about.json?jsonp=?",
         )
-        .success(function() { ; })
+        .success(function(about) {
+            SRimage = about.data.header_img;
+            SRdesc = about.data.public_description;;
+        })
         .error(function() {
             SRimage = null;
-            SRdesc = null;
+            SRdesc = "";
         })
         .complete(function() {
-			if (SRdesc == null) { SRdesc = ""; }
-			if (SRimage == null) {
+			if (SRimage == null || SRimage == "") {
                 var metaredditImg = "http://metareddit.com/static/logos/" + b.label + ".png";
                 if (resourceExists(metaredditImg)) {
                     SRimage = metaredditImg;
