@@ -689,39 +689,39 @@ function nodeActive(a) {
 
 		$.ajax({
             dataType: "json",
-            url: "http://www.reddit.com/r/" + b.label + "/about.json?jsonp=?"
-        })
-        .success(function(about) {
-            SRimage = about.data.header_img;
-            SRdesc = about.data.public_description;;
-        })
-        .error(function() {
-            SRimage = null;
-            SRdesc = "";
-        })
-        .complete(function() {
-			if (SRimage == null || SRimage == "") {
-                var metaredditImg = "http://metareddit.com/static/logos/" + b.label + ".png";
-                if (resourceExists(metaredditImg)) {
-                    SRimage = metaredditImg;
+            url: "http://www.reddit.com/r/" + b.label + "/about.json?jsonp=?",
+            success: function(about) {
+                SRimage = about.data.header_img;
+                SRdesc = about.data.public_description;;
+            },
+            error: function() {
+                SRimage = null;
+                SRdesc = "";
+            },
+            complete: function() {
+                if (SRimage == null || SRimage == "") {
+                    var metaredditImg = "http://metareddit.com/static/logos/" + b.label + ".png";
+                    if (resourceExists(metaredditImg)) {
+                        SRimage = metaredditImg;
+                    }
+                    else {
+                        SRimage = "img/sub-default.png";
+                    }
                 }
-                else {
-                    SRimage = "img/sub-default.png";
+                
+                $('#subreddit-logo').attr('src', SRimage);
+                $('#subreddit-logo').attr('alt', b.label);
+                $('#subreddit-logo').attr('title', b.label);
+
+                // Image field for attribute pane
+                if (image_attribute) {
+                    //image_index = jQuery.inArray(image_attribute, temp_array);
+                    $GP.info_name.html("<div><img src=" + f.attributes[image_attribute] + " style=\"vertical-align:middle\" /> <span onmouseover=\"sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex['" + b.id + '\'])" onmouseout="sigInst.refresh()">' + b.label + "</span></div>");
+                } else {
+                    $GP.info_name.html("<div><span onmouseover=\"sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex['" + b.id + '\'])" onmouseout="sigInst.refresh()"><a target="_blank" title="Go to /r/' + b.label + '" href="http://reddit.com/r/' + b.label + '/">' + b.label + ' <i class="icon-external-link"></i></a><br /><br />' + SRdesc + '</span></div>');
                 }
             }
-			
-			$('#subreddit-logo').attr('src', SRimage);
-			$('#subreddit-logo').attr('alt', b.label);
-			$('#subreddit-logo').attr('title', b.label);
-
-			// Image field for attribute pane
-			if (image_attribute) {
-				//image_index = jQuery.inArray(image_attribute, temp_array);
-				$GP.info_name.html("<div><img src=" + f.attributes[image_attribute] + " style=\"vertical-align:middle\" /> <span onmouseover=\"sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex['" + b.id + '\'])" onmouseout="sigInst.refresh()">' + b.label + "</span></div>");
-			} else {
-				$GP.info_name.html("<div><span onmouseover=\"sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex['" + b.id + '\'])" onmouseout="sigInst.refresh()"><a target="_blank" title="Go to /r/' + b.label + '" href="http://reddit.com/r/' + b.label + '/">' + b.label + ' <i class="icon-external-link"></i></a><br /><br />' + SRdesc + '</span></div>');
-			}
-		});
+        });
     }
     sigInst._core.plotter.drawHoverNode(sigInst._core.graph.nodesIndex[b.id]);  // Highlight the current node
     $GP.info_data.show();
