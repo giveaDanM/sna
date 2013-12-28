@@ -1,3 +1,54 @@
 #developercontainer {
 	display:none;
 }
+
+#mainpanel {
+    margin-top: 4px;
+    margin-left: 4px;
+    border: none;
+}
+
+#mainpanel>.col {
+    padding: 5px;
+}
+
+.extra-detail {
+    display: none;
+}
+
+.info>dl>.line {
+    display: inline;
+}
+
+.info>dl>.line>dd {
+    display: none;
+}
+
+form {
+    margin-bottom: 0;
+}
+
+#search>h2 {
+    display: none;
+}
+
+#search {
+    border-top: none;
+    padding: 4px 0 4px 0;
+}
+
+#zoom {
+    left: 4px;
+}
+
+#zoom>.z {
+    border: none;
+    background-size: 66%;
+    width: 40px;
+    height: 40px;
+}
+
+.loading {
+    left: 35%;
+    top: 35%;
+}

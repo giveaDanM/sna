@@ -144,6 +144,9 @@ function initSigma(config) {
 
 
 function setupGUI(config) {
+    // Set up touchscreen interface
+    
+
 	// Initialise main interface elements
 	var logo=""; // Logo elements
 	if (config.logo.file) {

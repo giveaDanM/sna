@@ -3,6 +3,10 @@ padding: 0px;
 margin: 0px;
 }
 
+.touch {
+    display: none;
+}
+
 .cf:before, .cf:after {
 	content: "";
 	display: table;
@@ -24,22 +28,6 @@ html,body {
 	font-size: 12px;
 	font-family: sans-serif;
 	line-height:1.25em;
-}
-
-#developercontainer>div {
-    display: inline-block;
-}
-
-#developercontainer>div#sigma-brand {
-    display: block;
-}
-
-.twitter-tweet {
-    width: 90px;
-}
-
-.fb-like {
-    width: 80px;
 }
 
 .sigma-parent {
@@ -216,6 +204,22 @@ font-size:14px;
 	position:fixed;
 	bottom:0;
     color: #fff;
+}
+
+#developercontainer>div {
+    display: inline-block;
+}
+
+#developercontainer>div#sigma-brand {
+    display: block;
+}
+
+.twitter-tweet {
+    width: 90px;
+}
+
+.fb-like {
+    width: 80px;
 }
 
 #jisc {
