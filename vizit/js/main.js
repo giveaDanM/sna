@@ -553,7 +553,7 @@ function nodeActive(a) {
         if (sigInst.neighbors.hasOwnProperty(edge.source) && sigInst.neighbors.hasOwnProperty(edge.target))
             edge.hidden = edgeCount <= LARGE_NETWORK;   // Only show immediate neighbours if the network is large
     }).iterNodes(function (_node) {
-        if (sigInst.neighbours.hasOwnProperty(_node.id)) {
+        if (sigInst.neighbors.hasOwnProperty(_node.id)) {
             _node.hidden = false;
         }
         else {
