@@ -61,29 +61,30 @@ form {
     width: 200px;
 }
 
-#attributepane>.nodeattributes {
+#attributepane .nodeattributes {
     overflow-y: auto;
     overflow-x: auto;
     border-bottom: none;
 }
 
-#attributepane>.nodeattributes.name {
+#attributepane .nodeattributes.name {
     padding: 0px;
     width: 200px;
 }
 
-#attributepane>.nodeattributes.data,
-#attributepane>.nodeattributes.p,
-#attributepane>.nodeattributes.link {
+#attributepane .nodeattributes .data,
+#attributepane .nodeattributes .p,
+#attributepane .nodeattributes .link {
     display: none;
 }
 
 #attributepane {
-    bottom: 5px;
+    bottom: 45px;
     top: initial;
     padding: 5px;
 }
 
 .left-close {
     margin-bottom: 0px;
+    margin-left: 0px;
 }
