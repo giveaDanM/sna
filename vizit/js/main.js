@@ -553,7 +553,7 @@ function nodeActive(a) {
         }
     }).iterEdges(function (edge) {
         // Complete the local network
-        if (sigInst.neighbours.hasOwnProperty(edge.source) && sigInst.neighbours.hasOwnProperty(edge.target))
+        if (sigInst.neighbors.hasOwnProperty(edge.source) && sigInst.neighbors.hasOwnProperty(edge.target))
             edge.hidden = edgeCount <= LARGE_NETWORK;   // Only show immediate neighbours if the network is large
     });
     sigInst.iterNodes(function (_node) {
