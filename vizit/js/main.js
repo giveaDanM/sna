@@ -213,8 +213,8 @@ function setupGUI(config) {
     $GP.info_close = $GP.info.find(".returntext");
     $GP.info_close2 = $GP.info.find(".close");
     $GP.info_p = $GP.info.find(".p");
-    $GP.info_close.click(nodeNormal);
-    $GP.info_close2.click(nodeNormal);
+    $GP.info_close.bind("click touchend", nodeNormal);
+    $GP.info_close2.bind("click touchend", nodeNormal);
     $GP.form = $("#mainpanel").find("form");
     $GP.search = new Search($GP.form.find("#search"));
     if (!config.features.search) {
@@ -349,7 +349,7 @@ function configSigmaElements(config) {
     $("#zoom").find("div.z").each(function () {
         var a = $(this),
             b = a.attr("rel");
-        a.click(function () {
+        a.bind("click touchend", function () {
 			if (b == "center") {
 				sigInst.position(0,0,1).draw();
 			} else {
@@ -359,17 +359,17 @@ function configSigmaElements(config) {
 
         })
     });
-    $GP.mini.click(function () {
+    $GP.mini.bind("click touchend", function () {
         $GP.mini.hide();
         $GP.intro.show();
         $GP.minifier.show()
     });
-    $GP.minifier.click(function () {
+    $GP.minifier.bind("click touchend", function () {
         $GP.intro.hide();
         $GP.minifier.hide();
         $GP.mini.show()
     });
-    $GP.intro.find("#showGroups").click(function () {
+    $GP.intro.find("#showGroups").bind("click touchend", function () {
         !0 == $GP.showgroup ? showGroups(!1) : showGroups(!0)
     });
     a = window.location.hash.substr(1);
@@ -412,7 +412,7 @@ function Search(a) {
     this.input.keydown(function (a) {
         if (13 == a.which) return b.state.addClass("searching"), b.search(b.input.val()), !1
     });
-    this.state.click(function () {
+    this.state.bind("click touchend", function () {
         var a = b.input.val();
         b.searching && a == b.lastSearch ? b.close() : (b.state.addClass("searching"), b.search(a))
     });
@@ -479,7 +479,7 @@ function Cluster(a) {
     this.list = this.cluster.find(".list");
     this.list.empty();
     this.select = this.cluster.find(".select");
-    this.select.click(function () {
+    this.select.bind("click touchend", function () {
         $GP.cluster.toggle()
     });
     this.toggle = function () {
@@ -487,7 +487,7 @@ function Cluster(a) {
     };
     this.content = function (a) {
         this.list.html(a);
-        this.list.find("a").click(function () {
+        this.list.find("a").bind("click touchend", function () {
             var a = $(this).attr("href").substr(1);
             showCluster(a)
         })
