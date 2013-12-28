@@ -3,6 +3,8 @@ var sigInst, canvas, $GP
 //Load configuration file
 var config={};
 
+var MAX_NEIGHBOR_DEGREE = 10;
+
 //For debug allow a config=file.json parameter to specify the config
 function GetQueryStringParams(sParam,defaultVal) {
     var sPageURL = ""+window.location;//.search.substring(1);//This might be causing error in Safari?
@@ -534,14 +536,13 @@ function nodeActive(a) {
     showGroups(!1);
 	var outgoing={},incoming={},mutual={};//SAH
     var edgeCount = 0;
-    var LARGE_NETWORK = 30;
     sigInst.iterEdges(function (b) {
         if (a == b.source || a == b.target) {
             b.hidden = false;
             ++edgeCount;
             n={
                 name: b.label,
-                colour: b.color
+                color: b.color
             };
             sigInst.neighbors[a == b.target ? b.source : b.target] = n;
         }
@@ -549,9 +550,13 @@ function nodeActive(a) {
             b.hidden = true;
         }
     }).iterEdges(function (edge) {
-        // Complete the local network
-        if (sigInst.neighbors.hasOwnProperty(edge.source) && sigInst.neighbors.hasOwnProperty(edge.target))
-            edge.hidden = edgeCount <= LARGE_NETWORK;   // Only show immediate neighbours if the network is large
+        // Complete the local network. Only show indirect edges if the degree is small
+        if (sigInst.neighbors.hasOwnProperty(edge.source)) {
+            edge.hidden = sigInst.getNodes(edge.source).degree < MAX_NEIGHBOR_DEGREE;
+        }
+        else if (sigInst.neighbors.hasOwnProperty(edge.target)) {
+            edge.hidden = sigInst.getNodes(edge.target).degree < MAX_NEIGHBOR_DEGREE;
+        }
     }).iterNodes(function (_node) {
         if (sigInst.neighbors.hasOwnProperty(_node.id)) {
             _node.hidden = false;
@@ -580,15 +585,16 @@ function nodeActive(a) {
       	 	 //c = sigInst.neighbors,
        		 g;
     for (g in c) {
-        var d = sigInst._core.graph.nodesIndex[g];
-        d.hidden = !1;
+        //var d = sigInst._core.graph.nodesIndex[g];
+        var d = sigInst.getNodes(g);
+        //d.hidden = !1;
         d.attr.lineWidth = !1;
-        d.attr.color = c[g].colour;
+        d.attr.color = c[g].color;
         a != g && e.push({
             id: g,
             name: d.label,
             group: (c[g].name)? c[g].name:"",
-            colour: c[g].colour
+            color: c[g].color
         })
     }
     /*
