@@ -535,7 +535,7 @@ function nodeActive(a) {
     sigInst.goTo(b.displayX, b.displayY, config.sigma.mouseProperties.maxRatio / 2);
 
     showGroups(!1);
-	var outgoing={},incoming={},mutual={}, _neighbours = {};//SAH
+	var outgoing={},incoming={},mutual={};//SAH
     var edgeCount = 0;
     var LARGE_NETWORK = 30;
     sigInst.iterEdges(function (b) {
@@ -547,14 +547,13 @@ function nodeActive(a) {
                 colour: b.color
             };
             sigInst.neighbors[a == b.target ? b.source : b.target] = n;
-            _neighbours[a == b.target ? b.source : b.target] = 1;
         }
         else {
             b.hidden = true;
         }
     }).iterEdges(function (edge) {
         // Complete the local network
-        if (_neighbours.hasOwnProperty(edge.source) != -1 && _neighbours.hasOwnProperty(edge.target) != -1)
+        if (sigInst.neighbours.hasOwnProperty(edge.source) && sigInst.neighbours.hasOwnProperty(edge.target))
             edge.hidden = edgeCount <= LARGE_NETWORK;   // Only show immediate neighbours if the network is large
     });
     sigInst.iterNodes(function (_node) {
