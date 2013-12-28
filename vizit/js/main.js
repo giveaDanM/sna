@@ -536,9 +536,12 @@ function nodeActive(a) {
 
     showGroups(!1);
 	var outgoing={},incoming={},mutual={}, _neighbours = {};//SAH
+    var edgeCount = 0;
+    var LARGE_NETWORK = 30;
     sigInst.iterEdges(function (b) {
         if (a == b.source || a == b.target) {
             b.hidden = false;
+            ++edgeCount;
             n={
                 name: b.label,
                 colour: b.color
@@ -552,7 +555,7 @@ function nodeActive(a) {
     }).iterEdges(function (edge) {
         // Complete the local network
         if (_neighbours.hasOwnProperty(edge.source) != -1 && _neighbours.hasOwnProperty(edge.target) != -1)
-            edge.hidden = false;
+            edge.hidden = edgeCount <= LARGE_NETWORK;   // Only show immediate neighbours if the network is large
     });
     sigInst.iterNodes(function (_node) {
         if (_neighbours.hasOwnProperty(_node.id)) {
