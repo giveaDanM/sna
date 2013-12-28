@@ -75,11 +75,11 @@ form {
 #attributepane .nodeattributes .data,
 #attributepane .nodeattributes .p,
 #attributepane .nodeattributes .link {
-    display: none;
+    display: none!important;
 }
 
 #attributepane {
-    bottom: 45px;
+    bottom: 100px;
     top: initial;
     padding: 5px;
 }
