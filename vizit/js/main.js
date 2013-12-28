@@ -536,6 +536,7 @@ function nodeActive(a) {
     showGroups(!1);
 	var outgoing={},incoming={},mutual={};//SAH
     var edgeCount = 0;
+    var neighborCount = null;
     sigInst.iterEdges(function (b) {
         if (a == b.source || a == b.target) {
             b.hidden = false;
@@ -551,11 +552,23 @@ function nodeActive(a) {
         }
     }).iterEdges(function (edge) {
         // Complete the local network. Only show indirect edges if the degree is small
-        if (sigInst.neighbors.hasOwnProperty(edge.source)) {
-            edge.hidden = sigInst.getNodes(edge.source).degree > MAX_NEIGHBOR_DEGREE;
+        if (neighborCount == null) {
+            neighborCount = Object.keys(sigInst.neighbors).length;
         }
-        else if (sigInst.neighbors.hasOwnProperty(edge.target)) {
-            edge.hidden = sigInst.getNodes(edge.target).degree > MAX_NEIGHBOR_DEGREE;
+        
+        if (edge.hidden) {
+            var sourceDegree = null;
+            var targetDegree = null;
+            if (sigInst.neighbors.hasOwnProperty(edge.source)) {
+                sourceDegree = sigInst.getNodes(edge.source).degree;
+            }
+            else if (sigInst.neighbors.hasOwnProperty(edge.target)) {
+                targetDegree = sigInst.getNodes(edge.target).degree;
+            }
+            
+            if (sourceDegree != null && targetDegree != null) {
+                edge.hidden = Math.max(sourceDegree, targetDegree) > MAX_NEIGHBOR_DEGREE;
+            }
         }
     }).iterNodes(function (_node) {
         if (sigInst.neighbors.hasOwnProperty(_node.id)) {
