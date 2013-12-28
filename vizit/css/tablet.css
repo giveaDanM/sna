@@ -19,6 +19,12 @@ form {
     padding: 4px 0 4px 0;
 }
 
+#zoom>.z {
+    background-size: 66%;
+    width: 40px;
+    height: 40px;
+}
+
 /*
 .touch {
     display: block;
