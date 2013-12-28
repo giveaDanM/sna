@@ -59,17 +59,18 @@ form {
 
 #attributepane {
     width: 200px;
+    border-radius: 15px 0 0 15px;
 }
 
 #attributepane .nodeattributes {
     overflow-y: auto;
     overflow-x: auto;
     border-bottom: none;
+    padding-left: 37px;
 }
 
-#attributepane .nodeattributes.name {
+#attributepane .nodeattributes .name {
     padding: 0px;
-    width: 200px;
 }
 
 #attributepane .nodeattributes .data,
