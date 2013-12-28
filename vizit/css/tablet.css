@@ -52,3 +52,32 @@ form {
     left: 35%;
     top: 35%;
 }
+
+.headertext {
+    display: none;
+}
+
+#attributepane>.nodeattributes {
+    overflow-y: hidden;
+    border-bottom: none;
+}
+
+#attributepane>.nodeattributes.name {
+    padding: 0px;
+}
+
+#attributepane>.nodeattributes.data,
+#attributepane>.nodeattributes.p,
+#attributepane>.nodeattributes.link {
+    display: none;
+}
+
+#attributepane {
+    bottom: 5px;
+    top: initial;
+    padding: 5px;
+}
+
+.left-close {
+    margin-bottom: 0px;
+}
