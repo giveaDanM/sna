@@ -552,10 +552,10 @@ function nodeActive(a) {
     }).iterEdges(function (edge) {
         // Complete the local network. Only show indirect edges if the degree is small
         if (sigInst.neighbors.hasOwnProperty(edge.source)) {
-            edge.hidden = sigInst.getNodes(edge.source).degree < MAX_NEIGHBOR_DEGREE;
+            edge.hidden = sigInst.getNodes(edge.source).degree > MAX_NEIGHBOR_DEGREE;
         }
         else if (sigInst.neighbors.hasOwnProperty(edge.target)) {
-            edge.hidden = sigInst.getNodes(edge.target).degree < MAX_NEIGHBOR_DEGREE;
+            edge.hidden = sigInst.getNodes(edge.target).degree > MAX_NEIGHBOR_DEGREE;
         }
     }).iterNodes(function (_node) {
         if (sigInst.neighbors.hasOwnProperty(_node.id)) {
