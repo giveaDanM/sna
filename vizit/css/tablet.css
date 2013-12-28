@@ -6,6 +6,19 @@
     display: none;
 }
 
+form {
+    margin-bottom: 0;
+}
+
+#search>h2 {
+    display: none;
+}
+
+#search {
+    border-top: none;
+    padding: 4px 0 4px 0;
+}
+
 /*
 .touch {
     display: block;
