@@ -57,13 +57,19 @@ form {
     display: none;
 }
 
+#attributepane {
+    width: 200px;
+}
+
 #attributepane>.nodeattributes {
-    overflow-y: hidden;
+    overflow-y: auto;
+    overflow-x: auto;
     border-bottom: none;
 }
 
 #attributepane>.nodeattributes.name {
     padding: 0px;
+    width: 200px;
 }
 
 #attributepane>.nodeattributes.data,
