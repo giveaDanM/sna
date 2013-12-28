@@ -1,3 +1,23 @@
 #developercontainer {
 	display:none;
 }
+
+.touch {
+    display: block;
+}
+
+#touch-msg {
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    opacity: 0.7;
+    padding: 0px;
+    position: fixed;
+}
+
+#touch-show {
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    z-index: 1000;
+}
