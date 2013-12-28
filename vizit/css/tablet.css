@@ -29,12 +29,15 @@ form {
     padding: 4px 0 4px 0;
 }
 
+#zoom {
+    left: 4px;
+}
+
 #zoom>.z {
     border: none;
     background-size: 66%;
     width: 40px;
     height: 40px;
-    left: 4px;
 }
 
 .loading {
