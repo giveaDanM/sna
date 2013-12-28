@@ -12,7 +12,15 @@
     padding: 5px;
 }
 
-#extra-detail {
+.extra-detail {
+    display: none;
+}
+
+.info>dl>.line {
+    display: inline;
+}
+
+.info>dl>.line>dd {
     display: none;
 }
 
