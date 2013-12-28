@@ -144,9 +144,6 @@ function initSigma(config) {
 
 
 function setupGUI(config) {
-    // Set up touchscreen interface
-    
-
 	// Initialise main interface elements
 	var logo=""; // Logo elements
 	if (config.logo.file) {
@@ -432,7 +429,7 @@ function Search(a) {
     this.search = function (a) {
         var b = !1,
             c = [],
-            b = this.exactMatch ? ("^" + a + "$").toLowerCase() : a.toLowerCase(),
+            b = this.exactMatch ? ("^\w*" + a + "\w*$").toLowerCase() : a.toLowerCase(),
             g = RegExp(b.replace(/.{3} /g, "$&.*"));
         this.exactMatch = !1;
         this.searching = !0;
@@ -555,9 +552,8 @@ function nodeActive(a) {
         // Complete the local network
         if (sigInst.neighbors.hasOwnProperty(edge.source) && sigInst.neighbors.hasOwnProperty(edge.target))
             edge.hidden = edgeCount <= LARGE_NETWORK;   // Only show immediate neighbours if the network is large
-    });
-    sigInst.iterNodes(function (_node) {
-        if (_neighbours.hasOwnProperty(_node.id)) {
+    }).iterNodes(function (_node) {
+        if (sigInst.neighbours.hasOwnProperty(_node.id)) {
             _node.hidden = false;
         }
         else {
