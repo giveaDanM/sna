@@ -5,8 +5,12 @@
 #mainpanel {
     margin-top: 4px;
     margin-left: 4px;
-    background-color: rgba(255,255,255,0.3);
+    background-color: rgba(255,255,255,0.7);
     border: none;
+}
+
+#mainpanel>.col {
+    padding: 5px;
 }
 
 #extra-detail {
@@ -26,12 +30,9 @@ form {
     padding: 4px 0 4px 0;
 }
 
-#zoom {
+#zoom>.z {
     background-color: rgba(255,255,255,0.3);
     border: none;
-}
-
-#zoom>.z {
     background-size: 66%;
     width: 40px;
     height: 40px;
