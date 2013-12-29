@@ -432,12 +432,13 @@ function Search(a) {
         var b = !1,
             c = [],
             b = this.exactMatch ? ("^" + a + "$").toLowerCase() : a.toLowerCase(),
-            g = RegExp(b.replace(/.{3} /g, "$&.*"));
+            //g = RegExp(b.replace(/.{3} /g, "$&.*"));
+            g = RegExp("^(?=.*" + b.split(/ +/).join(")(?=.*") + ").+", "i");
         this.exactMatch = !1;
         this.searching = !0;
         this.lastSearch = a;
         this.results.empty();
-        var lastSearchTerm = a;
+        var lastSearchTerm = a.toLowerCase();
         if (2 >= a.length) this.results.html("<i>You must search for a name with a minimum of 3 letters.</i>");
         else {
             var exactMatchIndex = -1;
