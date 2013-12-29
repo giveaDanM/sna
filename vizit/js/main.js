@@ -3,7 +3,7 @@ var sigInst, canvas, $GP
 //Load configuration file
 var config={};
 
-var MAX_NEIGHBOR_DEGREE = 10;
+var MAX_NEIGHBOR_FACTOR = 0.5;
 
 //For debug allow a config=file.json parameter to specify the config
 function GetQueryStringParams(sParam,defaultVal) {
@@ -431,7 +431,7 @@ function Search(a) {
     this.search = function (a) {
         var b = !1,
             c = [],
-            b = this.exactMatch ? ("^\w*" + a + "\w*$").toLowerCase() : a.toLowerCase(),
+            b = this.exactMatch ? ("^" + a + "$").toLowerCase() : a.toLowerCase(),
             g = RegExp(b.replace(/.{3} /g, "$&.*"));
         this.exactMatch = !1;
         this.searching = !0;
@@ -562,12 +562,12 @@ function nodeActive(a) {
             if (sigInst.neighbors.hasOwnProperty(edge.source)) {
                 sourceDegree = sigInst.getNodes(edge.source).degree;
             }
-            else if (sigInst.neighbors.hasOwnProperty(edge.target)) {
+            if (sigInst.neighbors.hasOwnProperty(edge.target)) {
                 targetDegree = sigInst.getNodes(edge.target).degree;
             }
             
             if (sourceDegree != null && targetDegree != null) {
-                edge.hidden = Math.max(sourceDegree, targetDegree) > MAX_NEIGHBOR_DEGREE;
+                edge.hidden = 1 / (Math.max(sourceDegree, targetDegree) * neighborCount) > MAX_NEIGHBOR_FACTOR;
             }
         }
     }).iterNodes(function (_node) {
