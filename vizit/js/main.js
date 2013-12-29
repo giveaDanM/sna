@@ -403,6 +403,14 @@ function Search(a) {
         if (aMatchCount > bMatchCount)
             return -1;
 
+        // Sort by size descending
+        var aSize = a.Size;
+        var bSize = b.Size;
+        if (aSize < bSize)
+            return 1;
+        if (aSize > bSize)
+            return -1;
+
         // Sort alphanumerically ascending
         var aName = a.name.toLowerCase();
         var bName = b.name.toLowerCase();
@@ -463,6 +471,7 @@ function Search(a) {
                     c.push({
                         id: a.id,
                         name: a.label,
+                        size: a.size,
                         matchCount: match.length
                     });
 
