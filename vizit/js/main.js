@@ -433,7 +433,7 @@ function Search(a) {
             c = [],
             b = this.exactMatch ? ("^" + a + "$").toLowerCase() : a.toLowerCase(),
             //g = RegExp(b.replace(/.{3} /g, "$&.*"));
-            g = RegExp("^(?=.*" + b.split(/\s+/).join(")(?=.*") + ").+", "i");
+            g = RegExp("^(?=.*" + b.match(/[^ ]+/).join(")(?=.*") + ").+", "i");
         this.exactMatch = !1;
         this.searching = !0;
         this.lastSearch = a;
