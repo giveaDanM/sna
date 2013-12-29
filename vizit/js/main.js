@@ -440,7 +440,7 @@ function Search(a) {
         this.results.empty();
         var lastSearchTerm = a.toLowerCase();
         var validTerms = a.match(/[^\s]{3,}/g);
-        if (validTerms == null || validTerms.length = 0) {
+        if (validTerms == null || validTerms.length == 0) {
             this.results.html("<i>Please specify at least one search term with 3 or more characters</i>");
         }
         else {
