@@ -469,7 +469,7 @@ function Search(a) {
                     var aName = a.label.toLowerCase();
                     if (aName == lastSearchTerm) {
                         exactMatchIndex = c.length - 1;
-                        foundExactMatch  true;
+                        foundExactMatch = true;
                     }
                     else if (!foundExactMatch && lastSearchTermAlt.test(aName)) {
                         exactMatchIndex = c.length - 1;
