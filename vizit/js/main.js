@@ -3,7 +3,7 @@ var sigInst, canvas, $GP
 //Load configuration file
 var config={};
 
-var MAX_NEIGHBOR_FACTOR = 0.5;
+var MAX_NEIGHBOR_FACTOR = 100000;
 
 //For debug allow a config=file.json parameter to specify the config
 function GetQueryStringParams(sParam,defaultVal) {
@@ -567,7 +567,7 @@ function nodeActive(a) {
             }
             
             if (sourceDegree != null && targetDegree != null) {
-                edge.hidden = MAX_NEIGHBOR_FACTOR / (Math.max(sourceDegree, targetDegree) * neighborCount) > 1;
+                edge.hidden = Math.pow(neighborCount, 2) * Math.max(sourceDegree, targetDegree) / MAX_NEIGHBOR_FACTOR > neighborCount;
             }
         }
     }).iterNodes(function (_node) {
