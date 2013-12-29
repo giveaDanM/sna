@@ -449,12 +449,14 @@ function Search(a) {
         this.lastSearch = a;
         this.results.empty();
         var lastSearchTerm = a.toLowerCase().trim();
+        var lastSearchTermAlt = RegExp("^" + a.toLowerCase().trim().replace(/\s+/g, '[ _-]?') + "$");
         var validTerms = a.match(/[^\s]{3,}/g);
         if (validTerms == null || validTerms.length == 0) {
             this.results.html("<i>Please specify at least one search term with 3 or more characters</i>");
         }
         else {
             var exactMatchIndex = -1;
+            var foundExactMatch = false;
             sigInst.iterNodes(function (a) {
                 match = matchPattern.exec(a.label.toLowerCase());
                 if (match != null) {
@@ -464,7 +466,12 @@ function Search(a) {
                         matchCount: match.length
                     });
 
-                    if (a.label.toLowerCase() == lastSearchTerm) {
+                    var aName = a.label.toLowerCase();
+                    if (aName == lastSearchTerm) {
+                        exactMatchIndex = c.length - 1;
+                        foundExactMatch  true;
+                    }
+                    else if (!foundExactMatch && lastSearchTermAlt.test(aName)) {
                         exactMatchIndex = c.length - 1;
                     }
                 }
