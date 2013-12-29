@@ -14,7 +14,7 @@
   },
   "legend": {
     "edgeLabel": "Cross-posts",
-    "colorLabel": "Number of connections (degree). Red = lots, blue = few",
+    "colorLabel": "Number of connections. Red = many, blue = few",
     "nodeLabel": "Subreddit"
   },
   "features": {
