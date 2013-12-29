@@ -456,7 +456,7 @@ function Search(a) {
         else {
             var exactMatchIndex = -1;
             sigInst.iterNodes(function (a) {
-                match = matchPattern.match(a.label.toLowerCase());
+                match = matchPattern.exec(a.label.toLowerCase());
                 if (match != null) {
                     c.push({
                         id: a.id,
