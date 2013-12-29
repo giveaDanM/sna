@@ -394,13 +394,23 @@ function Search(a) {
     this.lastSearch = "";
     this.searching = !1;
     var b = this;
-    var resultSort = function(a, b) {
+    this.resultSort = function(a, b) {
+        // Sort by match count descending
+        var aMatchCount = a.matchCount;
+        var bMatchCount = b.matchCount;
+        if (aMatchCount < bMatchCount)
+            return 1;
+        if (aMatchCount > bMatchCount)
+            return -1;
+
+        // Sort alphanumerically ascending
         var aName = a.name.toLowerCase();
         var bName = b.name.toLowerCase();
         if (aName < bName)
             return -1;
         if (aName > bName)
             return 1;
+
         return 0;
     };
     this.input.focus(function () {
@@ -433,12 +443,12 @@ function Search(a) {
             c = [],
             b = this.exactMatch ? ("^" + a + "$").toLowerCase() : a.toLowerCase(),
             //g = RegExp(b.replace(/.{3} /g, "$&.*"));
-            g = RegExp("^(?=.*" + a.match(/[^\s]+/).join(")(?=.*") + ").+", "i");
+            matchPattern = RegExp("^(?=.*" + a.match(/[^\s]+/).join(")(?=.*") + ").+", "i");
         this.exactMatch = !1;
         this.searching = !0;
         this.lastSearch = a;
         this.results.empty();
-        var lastSearchTerm = a.toLowerCase();
+        var lastSearchTerm = a.toLowerCase().trim();
         var validTerms = a.match(/[^\s]{3,}/g);
         if (validTerms == null || validTerms.length == 0) {
             this.results.html("<i>Please specify at least one search term with 3 or more characters</i>");
@@ -446,23 +456,28 @@ function Search(a) {
         else {
             var exactMatchIndex = -1;
             sigInst.iterNodes(function (a) {
-                g.test(a.label.toLowerCase()) && c.push({
-                    id: a.id,
-                    name: a.label
-                });
-                if (a.label.toLowerCase() == lastSearchTerm) {
-                    exactMatchIndex = c.length - 1;
+                match = matchPattern.match(a.label.toLowerCase());
+                if (match != null) {
+                    c.push({
+                        id: a.id,
+                        name: a.label,
+                        matchCount: match.length
+                    });
+
+                    if (a.label.toLowerCase() == lastSearchTerm) {
+                        exactMatchIndex = c.length - 1;
+                    }
                 }
             });
             // c is our results list. Let's sort it, putting any exact match at the top
             if (exactMatchIndex != -1) {
                 var exactMatchTxt = c[exactMatchIndex];
                 c.splice(exactMatchIndex, 1);   // Remove the exact result
-                c.sort(resultSort);   // Sort alphanumerically
+                c.sort(this.resultSort);   // Sort by match quality and alphanumerically
                 c.splice(0, 0, exactMatchTxt); // Re-insert the exact match at the start
             }
             else {
-                c.sort(resultSort);
+                c.sort(this.resultSort);
             }
 
             c.length ? (b = !0, nodeActive(c[0].id)) : b = showCluster(a);
