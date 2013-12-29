@@ -567,7 +567,7 @@ function nodeActive(a) {
             }
             
             if (sourceDegree != null && targetDegree != null) {
-                edge.hidden = 1 / (Math.max(sourceDegree, targetDegree) * neighborCount) > MAX_NEIGHBOR_FACTOR;
+                edge.hidden = MAX_NEIGHBOR_FACTOR / (Math.max(sourceDegree, targetDegree) * neighborCount) > 1;
             }
         }
     }).iterNodes(function (_node) {
