@@ -28,6 +28,7 @@ html, body {
     -moz-box-shadow: 5px 5px 5px #aaa;
     box-shadow: 5px 5px 5px #aaa;
     position: relative;
+    margin-bottom: 10px;
 
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
@@ -42,6 +43,10 @@ html, body {
     -moz-transition: opacity 1s ease-in-out;
     -o-transition: opacity 1s ease-in-out;
     transition: opacity 1s ease-in-out;
+
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
 }
 
 /*
@@ -84,7 +89,7 @@ html, body {
 animation-name: imgTransition;
 animation-timing-function: ease-in-out;
 animation-iteration-count: infinite;
-animation-duration: 10s;
+animation-duration: 5s;
 animation-direction: alternate;
 }
 
