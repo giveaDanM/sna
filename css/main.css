@@ -5,6 +5,12 @@ html, body {
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
 }
 
+#header {
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+}
+    
 .container {
     width: 100%;
 }
@@ -20,6 +26,24 @@ html, body {
 
 .preview>img {
     height: 100%;
+}
+
+.preview>img:first-child {
+    -webkit-border-radius: 10px 0 0 10px;
+    -moz-border-radius: 10px 0 0 10px;
+    border-radius: 10px 0 0 10px;
+}
+
+.preview>img:last-child {
+    -webkit-border-radius: 0 10px 10px 0;
+    -moz-border-radius: 0 10px 10px 0;
+    border-radius: 0 10px 10px 0;
+}
+
+.preview>img:only-child {
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
 }
 
 #main {
