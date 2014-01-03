@@ -20,19 +20,18 @@ html, body {
     margin: 0 auto;
 }
 
+.shadow {
+    -webkit-box-shadow: 5px 5px 5px #aaa;
+    -moz-box-shadow: 5px 5px 5px #aaa;
+    box-shadow: 5px 5px 5px #aaa;
+}
+
 .preview {
     height: 300px;
     width: 400px;
     margin: 0 auto;
-    -webkit-box-shadow: 5px 5px 5px #aaa;
-    -moz-box-shadow: 5px 5px 5px #aaa;
-    box-shadow: 5px 5px 5px #aaa;
     position: relative;
     margin-bottom: 10px;
-
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    border-radius: 10px;
 }
 
 .preview img {
