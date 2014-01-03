@@ -34,15 +34,35 @@
                         In April 2013 <a target="_blank" href="http://www.reddit.com/r/TheoryOfReddit/comments/1ava66/has_anyone_ever_made_a_graph_of_how_all_the/">I posed the question</a>: has anyone ever tried to perform social network analysis on <a target="_blank" href="http://www.reddit.com">Reddit</a> by visualising the links between different subreddits? As you can see from the discussion on that page, several other attempts have also been made at answering this question, mainly by using sidebar links to define connections between subreddits.
                     </p>
                     <p>
-                        This page is my first attempt at answering this question in a new way. I've produced two graphs showing links between subreddits:
-                    </p>
-                    <h2><a href="/sna/selfposts.html">Self-post map</a></h2>
-                    <p>
-                        In this interactive map, associations are defined when a redditor posts a link to one subreddit in another subreddit. The data was cropped quite heavily to make the map readable so some of your favourite subs (most notably the big ones) may be missing.
+                        Here are my attempts at creating an interactive map of Reddit:
                     </p>
                     <h2><a href="/sna/vizit">Vizit</a></h2>
                     <p>
-                        Like the self-posts map, only much bigger. In this interactive map, associations are defined by common links (known in Reddit vernacular as 'cross-posts', or more simply 'xposts'), i.e. if the same website is linked to from two different subreddits, then that's an association. There's much more data here, including the big subreddits. The subs are arranged so that they should be grouped with other subs of a similar subject. Clicking on a sub will show its local network - this is all the other subs that have contained similar content at some point. Beware, this dataset is quite big and may take a while to load!
+                        After creating my original self-post map (see below) I was unsatisfied with how little of Reddit was represented in this dataset. To that end I created a new dataset, this time defining links by the number of times subreddits contain links to the same websites (so not just other sections of reddit). This dataset was much larger, so I had to make the visualisation more interactive to allow you to hide parts of the network in order to focus on the bits you care about. <a href="/sna/vizit">Click here to try it out</a>.
+                    </p>
+                    <h3>Offshoots</h3>
+                    <p>
+                        You may also want to check out Rhiever's <a href="http://rhiever.github.io/redditviz/clustered/">redditviz</a> site. Based on Vizit, it uses the same code to visualise a slightly different dataset: that of subreddit associations defined by sidebar links. Check out the <a href="http://arxiv.org/abs/1312.3387">research paper</a> by Michigan State University if you'd like to know how the dataset was produced.
+                    </p>
+                    <h2><a href="/sna/selfposts.html">Self-post map</a></h2>
+                    <p>
+                        This was my first attempt at mapping the relationships between subreddits, with associations defined by a redditor posting a link to one subreddit in another subreddit. In order to make the map usable, I had to remove a lot of data (which is why many subs are missing). This work has largely been superseded by <a href="/sna/vizit">Vizit</a> now, but I've left <a href="/sna/selfposts.html">here</a> for reference, due to the media interest it received.
+                    </p>
+                    <h3>Press</h3>
+                    <p>
+                        It just so happened that a few online media types picked up on this work and reported it. Here are some links to those articles:
+                    </p>
+                        <ul>
+                            <li><a href="http://mashable.com/2013/05/13/reddit-subreddit-graph/">Mashable</a> - Here's How Reddit's Communities Are Interconnected</li>
+                            <li><a href="http://www.huffingtonpost.com/2013/05/16/reddit-graph-subreddit_n_3280563.html">Huffington Post</a> - Reddit User Makes Beautiful, Explorable Graph Of Subreddit Community</li>
+                            <li><a href="http://www.technobuffalo.com/2013/05/27/mapping-the-universe-of-reddit/">Techno Buffalo</a> - Redditor Visually Maps Subreddit Community In Visually Arresting, Interactive Graph</li>
+                            <li><a href="http://www.crackajack.de/2013/05/14/visualization-of-the-reddit-network/">Crackajack.de</a> - 	
+Visualization of the Reddit Network (German)</li>
+                            <li><a href="http://animalnewyork.com/2013/this-is-what-reddit-really-looks-like/">Animal</a> - This Is What Reddit Really Looks Like</li>
+                            <li><a href="http://www.trendhunter.com/trends/interactive-data-map">Trendhunter</a> - This Interactive Data Map of the Reddit Universe is Responsive</li>
+                        </ul>
+                    <p>
+                        If you'd like to write about any of my work, please <a target="_blank" href="http://www.reddit.com/message/compose/?to=sharkbait784&subject=Reddalysis">contact me</a> to set up an interview.
                     </p>
                 </div>
             </div>
