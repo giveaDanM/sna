@@ -35,7 +35,7 @@ html, body {
     border-radius: 10px;
 }
 
-.preview>img {
+.preview img {
     height: 100%;
     position:absolute;
     left:0;
@@ -85,7 +85,7 @@ html, body {
     }
 }
 
-.preview>img.top {
+.preview img.top {
 animation-name: imgTransition;
 animation-timing-function: ease-in-out;
 animation-iteration-count: infinite;
