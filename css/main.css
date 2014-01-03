@@ -14,6 +14,14 @@ html, body {
     margin: 0 auto;
 }
 
+.preview {
+    height: 450px;
+}
+
+.preview>img {
+    height: 100%;
+}
+
 #main {
     width: 80%;
     margin-top: 80px;
