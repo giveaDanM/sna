@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gexf version="1.2" xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema-instance">
+  <graph defaultedgetype="undirected" mode="static" name="">
+    <meta>
+      <creator>NetworkX 2.2</creator>
+      <lastmodified>06/06/2021</lastmodified>
+    </meta>
+    <nodes>
+      <node id="AskReddit" label="AskReddit" />
+      <node id="Jokes" label="Jokes" />
+      <node id="The_Donald" label="The_Donald" />
+      <node id="Art" label="Art" />
+      <node id="videos" label="videos" />
+      <node id="gaming" label="gaming" />
+      <node id="leagueoflegends" label="leagueoflegends" />
+      <node id="pcmasterrace" label="pcmasterrace" />
+      <node id="Showerthoughts" label="Showerthoughts" />
+      <node id="news" label="news" />
+      <node id="politics" label="politics" />
+      <node id="aww" label="aww" />
+      <node id="pics" label="pics" />
+      <node id="worldnews" label="worldnews" />
+      <node id="business" label="business" />
+      <node id="trees" label="trees" />
+      <node id="EnoughTrumpSpam" label="EnoughTrumpSpam" />
+      <node id="funny" label="funny" />
+      <node id="dankmemes" label="dankmemes" />
+      <node id="Music" label="Music" />
+      <node id="movies" label="movies" />
+      <node id="todayilearned" label="todayilearned" />
+      <node id="GlobalOffensive" label="GlobalOffensive" />
+      <node id="mildlyinteresting" label="mildlyinteresting" />
+      <node id="me_irl" label="me_irl" />
+      <node id="buildapc" label="buildapc" />
+      <node id="HOTandTRENDING" label="HOTandTRENDING" />
+      <node id="BreakingNews24hr" label="BreakingNews24hr" />
+      <node id="spam" label="spam" />
+      <node id="DotA2" label="DotA2" />
+    </nodes>
+    <edges>
+      <edge id="0" source="AskReddit" target="Jokes" weight="0.011831213107007521" />
+      <edge id="1" source="Jokes" target="Showerthoughts" weight="0.03264139387749987" />
+      <edge id="2" source="Jokes" target="aww" weight="0.013424927342140514" />
+      <edge id="3" source="Jokes" target="pics" weight="0.012004400419278305" />
+      <edge id="4" source="Jokes" target="me_irl" weight="0.008037726532281075" />
+      <edge id="5" source="Jokes" target="buildapc" weight="0.020874097558884475" />
+      <edge id="6" source="Jokes" target="DotA2" weight="0.018477250586271476" />
+      <edge id="7" source="Jokes" target="todayilearned" weight="0.008245142658380389" />
+      <edge id="8" source="The_Donald" target="Art" weight="0.009282770527624273" />
+      <edge id="9" source="Art" target="pics" weight="0.017274040830071558" />
+      <edge id="10" source="videos" target="gaming" weight="0.007567889306443032" />
+      <edge id="11" source="videos" target="leagueoflegends" weight="0.010747804919693627" />
+      <edge id="12" source="videos" target="pcmasterrace" weight="0.018736647577311416" />
+      <edge id="13" source="gaming" target="funny" weight="0.08741919845209845" />
+      <edge id="14" source="gaming" target="aww" weight="0.05733199105422526" />
+      <edge id="15" source="gaming" target="pics" weight="0.21278486211876868" />
+      <edge id="16" source="gaming" target="pcmasterrace" weight="0.007479785147753382" />
+      <edge id="17" source="gaming" target="dankmemes" weight="0.41244184979847853" />
+      <edge id="18" source="leagueoflegends" target="GlobalOffensive" weight="0.012000426022685806" />
+      <edge id="19" source="pcmasterrace" target="buildapc" weight="0.016977219123278764" />
+      <edge id="20" source="news" target="politics" weight="0.12112097933203958" />
+      <edge id="21" source="news" target="aww" weight="0.002406041262212888" />
+      <edge id="22" source="news" target="pics" weight="0.05714793575015531" />
+      <edge id="23" source="news" target="worldnews" weight="0.1336181708422718" />
+      <edge id="24" source="news" target="business" weight="0.02578526108139545" />
+      <edge id="25" source="news" target="trees" weight="0.015555882840689983" />
+      <edge id="26" source="news" target="EnoughTrumpSpam" weight="0.002110324873953462" />
+      <edge id="27" source="politics" target="pics" weight="0.011284573531331499" />
+      <edge id="28" source="politics" target="worldnews" weight="0.1038719111005435" />
+      <edge id="29" source="politics" target="Music" weight="0.02335108785568296" />
+      <edge id="30" source="politics" target="business" weight="0.017562405581128426" />
+      <edge id="31" source="politics" target="movies" weight="0.064108907511911" />
+      <edge id="32" source="politics" target="EnoughTrumpSpam" weight="0.11659198496956591" />
+      <edge id="33" source="aww" target="funny" weight="0.11134694884769036" />
+      <edge id="34" source="aww" target="pics" weight="0.17029855951844663" />
+      <edge id="35" source="aww" target="business" weight="0.04399541168076748" />
+      <edge id="36" source="aww" target="todayilearned" weight="0.004393180618449066" />
+      <edge id="37" source="pics" target="funny" weight="0.041951559651462356" />
+      <edge id="38" source="pics" target="worldnews" weight="0.011217122395483003" />
+      <edge id="39" source="pics" target="business" weight="0.006954065379270791" />
+      <edge id="40" source="pics" target="dankmemes" weight="0.12561737292452535" />
+      <edge id="41" source="pics" target="mildlyinteresting" weight="0.012651388095520133" />
+      <edge id="42" source="pics" target="todayilearned" weight="0.009820816514316322" />
+      <edge id="43" source="worldnews" target="business" weight="0.021042437995515972" />
+      <edge id="44" source="worldnews" target="movies" weight="0.06883950172226816" />
+      <edge id="45" source="business" target="Music" weight="0.02055714013657095" />
+      <edge id="46" source="business" target="movies" weight="0.012541845338996382" />
+      <edge id="47" source="business" target="spam" weight="0.008325349066569676" />
+      <edge id="48" source="trees" target="EnoughTrumpSpam" weight="0.02298573179022778" />
+      <edge id="49" source="EnoughTrumpSpam" target="movies" weight="0.016599675624850208" />
+      <edge id="50" source="Music" target="movies" weight="0.05836501489539492" />
+      <edge id="51" source="mildlyinteresting" target="me_irl" weight="0.011294569126194975" />
+      <edge id="52" source="HOTandTRENDING" target="BreakingNews24hr" weight="0.9999811516153573" />
+    </edges>
+  </graph>
+</gexf>
