@@ -1,7 +1,7 @@
 {
   "type": "network",
   "version": "1.0",
-  "data": "data.gexf",
+  "data": "data.json",
   "logo": {
     "text": "Visual Reddit",
     "file": "img\/reddit.png",
