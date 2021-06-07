@@ -1,1 +1,1 @@
-{"directed": false, "multigraph": false, "graph": {}, "nodes": [{"id": "AskReddit", "size":10, "x":100, "y":100}, {"id": "Jokes", "size":20, "x":200, "y":100}], "edges": [{"weight": 0.011831213107007521, "source": "AskReddit", "target": "Jokes"}]}
+{"directed": false, "multigraph": false, "graph": {}, "nodes": [{"id": "AskReddit", "size":10, "x":100, "y":10}, {"id": "Jokes", "size":20, "x":200, "y":10}], "edges": [{"source": "AskReddit", "target": "Jokes", "attributes":{"weight": 0.011831213107007521}}]}
